@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form action="#" th:action="@{/addTool}" th:object="${tool}" method="post">
+    <label for="language">Az eszköz nyelve:</label>
+    <input type="text" th:field="*{language}" id="language" placeholder="Egy programozási nyelv">
+    <span th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></span>
+
+    <label for="name">Az eszköz neve:</label>
+    <input type="text" th:field="*{name}" id="name" placeholder="Egy név">
+    <span th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></span>
+
+    <label for="path">Az eszköz elérési útja:</label>
+    <textarea th:field="*{path}" id="path" placeholder="Egy elérési útvonal"></textarea>
+
+    <label for="input">Az eszköz argumentumai:</label>
+    <textarea th:field="*{arguments}" id="input" placeholder="Egy input"></textarea>
+    <span th:if="${#fields.hasErrors()}" th:errors="*{arguments}"></span>
+
+    <label for="environmentArgs">Az eszköz környezeti változói:</label>
+    <input type="text" th:field="*{environmentArgs}" id="environmentArgs" placeholder="Egy környezeti változó">
+    <input type="submit" value="Eszköz hozzáadása">
+</form>
+<a th:href="@{/toolList}">
+    Vissza
+</a>
+</body>
+</html>

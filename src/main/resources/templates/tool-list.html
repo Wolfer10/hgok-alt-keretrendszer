@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<table>
+    <tr style="border: 2px solid black" th:each = "tool : ${tools}">
+        <td>Az eszköz nyelve:</td>
+        <td th:text="${tool.getLanguage()}"> </td>
+        <td>Az eszköz útvonala:</td>
+        <td th:text="${tool.getPath()}"> </td>
+        <td>Az eszköz argumentumai:</td>
+        <td th:text="${tool.getArguments()}"> </td>
+        <td>Az eszköz környezeti változói</td>
+        <td th:text="${tool.getEnvironmentArgs()}"> </td>
+    </tr>
+</table>
+<a th:href="@{/addTool}">Eszköz hozzáadása</a>
+<a th:href="@{/index}">Főoldal</a>
+
+</body>
+</html>
