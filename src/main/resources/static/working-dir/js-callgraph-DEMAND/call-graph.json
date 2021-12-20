@@ -1,0 +1,45 @@
+{
+  "directed": true,
+  "nodes": [
+    {
+      "id": 0,
+      "label": "<entry>",
+      "pos": "<entry>",
+      "entry": true,
+      "final": true
+    },
+    {
+      "id": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@3",
+      "pos": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:3:1",
+      "entry": false,
+      "final": false
+    },
+    {
+      "id": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@9",
+      "pos": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:9:1",
+      "entry": false,
+      "final": false
+    },
+    {
+      "id": 3,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@29",
+      "pos": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:29:1",
+      "entry": false,
+      "final": true
+    }
+  ],
+  "links": [
+    {
+      "target": 2,
+      "source": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@3 -> F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@9"
+    },
+    {
+      "target": 3,
+      "source": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@9 -> F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@29"
+    }
+  ]
+}

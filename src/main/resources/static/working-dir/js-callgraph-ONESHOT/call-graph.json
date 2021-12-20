@@ -1,0 +1,13 @@
+{
+  "directed": true,
+  "nodes": [
+    {
+      "id": 0,
+      "label": "<entry>",
+      "pos": "<entry>",
+      "entry": true,
+      "final": true
+    }
+  ],
+  "links": []
+}

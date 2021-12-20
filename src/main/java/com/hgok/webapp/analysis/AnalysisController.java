@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,6 +25,8 @@ public class AnalysisController {
     private ToolRepository toolRepository;
     @Autowired
     private AnalysisService analysisService;
+    @Autowired
+    private AnalysisRepository analysisRepository;
 
     @GetMapping("/startAnalysis")
     String showStartAnalysis(Model model){
@@ -40,16 +43,16 @@ public class AnalysisController {
 
     }
     @PostMapping("/startAnalysis")
-    String startAnalysis(@RequestParam(value = "name") String[] names) throws IOException, InterruptedException {
-        List<Tool> filteredTools = new ArrayList<>();
-        List<Tool> tools = toolRepository.findAll();
-        for (String name : names) {
-            filteredTools.addAll(tools.stream().filter(tool -> tool.getName().equals(name)).collect(Collectors.toList()));
-        }
+    String startAnalysis(@RequestParam(value = "name") String[] names) throws IOException {
+        analysisService.startAnalysis(names);
 
-        for (Tool filteredTool : filteredTools) {
-            analysisService.startProcess(filteredTool.getArguments(), filteredTool.getName());
-        }
-        return "redirect:/startAnalysis";
+        return "redirect:/listAnalysis";
     }
+
+    @GetMapping("/listAnalysis")
+    String showListAnalysis(Model model){
+        model.addAttribute("analysisList", analysisRepository.findAll());
+        return "analysis-list";
+    }
+
 }

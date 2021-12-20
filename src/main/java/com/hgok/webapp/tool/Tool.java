@@ -17,20 +17,29 @@ import javax.validation.constraints.NotBlank;
 public class Tool {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long id;
 
     @Column(unique=true)
     @NotBlank
-    String name;
+    private String name;
 
     @NotBlank
-    String language;
+    private String language;
 
     @NotBlank
-    String path;
+    private String path;
 
     @NotBlank
-    String arguments;
+    private String arguments;
 
-    String environmentArgs;
+    private String environmentArgs;
+
+    public void copyTool(Tool tool){
+        setName(tool.getName());
+        setLanguage(tool.getLanguage());
+        setPath(tool.getPath());
+        setArguments(tool.getArguments());
+        setEnvironmentArgs(tool.getEnvironmentArgs());
+    }
+
 }

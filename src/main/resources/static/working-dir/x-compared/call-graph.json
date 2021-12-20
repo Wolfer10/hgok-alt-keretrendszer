@@ -1,0 +1,65 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "nodes": [
+    {
+      "id": 0,
+      "label": "<entry>",
+      "pos": "<entry>",
+      "entry": true,
+      "final": true,
+      "foundBy": [
+        "acg-demand",
+        "acg-oneshot"
+      ]
+    },
+    {
+      "id": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@3",
+      "pos": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:3:1",
+      "entry": false,
+      "final": false,
+      "foundBy": [
+        "acg-demand"
+      ]
+    },
+    {
+      "id": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@9",
+      "pos": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:9:1",
+      "entry": false,
+      "final": false,
+      "foundBy": [
+        "acg-demand"
+      ]
+    },
+    {
+      "id": 3,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js@29",
+      "pos": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:29:1",
+      "entry": false,
+      "final": true,
+      "foundBy": [
+        "acg-demand"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": 2,
+      "source": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:3:1->F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:9:1",
+      "foundBy": [
+        "acg-demand"
+      ]
+    },
+    {
+      "target": 3,
+      "source": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:9:1->F:/Feri/egyetem/szakdoga/hcg-js-framework/node-sources/McBabe/lib/main.js:29:1",
+      "foundBy": [
+        "acg-demand"
+      ]
+    }
+  ]
+}

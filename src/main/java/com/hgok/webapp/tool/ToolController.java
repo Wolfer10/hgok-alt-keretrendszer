@@ -39,35 +39,31 @@ public class ToolController {
         return "tool-list";
     }
 
-
-
     @GetMapping("/edit/{id}")
     public String showUpdateForm(@PathVariable("id") long id, Model model) {
         Tool tool = toolRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid tool Id:" + id));
 
         model.addAttribute("tool", tool);
-        return "update-tool";
+        return "add-tool";
     }
 
-    @PostMapping("/update/{id}")
-    public String updateTool(@PathVariable("id") long id, @Valid Tool tool,
-                             BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            tool.setId(id);
-            return "update-tool";
-        }
-
-        toolRepository.save(tool);
-        return "redirect:/index";
+    @PostMapping("/addTool/{id}")
+    public String editTool(@PathVariable("id") long id, @Valid Tool tool,  Model model){
+        Tool existingTool = toolRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+        existingTool.copyTool(tool);
+        toolRepository.save(existingTool);
+        return  "redirect:/toolList";
     }
+
 
     @GetMapping("/delete/{id}")
     public String deleteTool(@PathVariable("id") long id, Model model) {
         Tool tool = toolRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         toolRepository.delete(tool);
-        return "redirect:/index";
+        return "redirect:/toolList";
     }
 
 

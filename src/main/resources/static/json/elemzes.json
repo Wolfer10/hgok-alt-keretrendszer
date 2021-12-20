@@ -1,0 +1,138 @@
+[
+  {
+    "source": {
+      "label": "main",
+      "file": "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\node-sources\\McBabe\\lib\\main.js",
+      "start": {
+        "row": 3,
+        "column": 0
+      },
+      "end": {
+        "row": 7,
+        "column": 1
+      },
+      "range": {
+        "start": 33,
+        "end": 127
+      }
+    },
+    "target": {
+      "label": "divide",
+      "file": "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\node-sources\\McBabe\\lib\\main.js",
+      "start": {
+        "row": 9,
+        "column": 0
+      },
+      "end": {
+        "row": 27,
+        "column": 1
+      },
+      "range": {
+        "start": 129,
+        "end": 394
+      }
+    }
+  },
+  {
+    "source": {
+      "label": "divide",
+      "file": "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\node-sources\\McBabe\\lib\\main.js",
+      "start": {
+        "row": 9,
+        "column": 0
+      },
+      "end": {
+        "row": 27,
+        "column": 1
+      },
+      "range": {
+        "start": 129,
+        "end": 394
+      }
+    },
+    "target": {
+      "label": "raise_error",
+      "file": "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\node-sources\\McBabe\\lib\\main.js",
+      "start": {
+        "row": 29,
+        "column": 0
+      },
+      "end": {
+        "row": 31,
+        "column": 1
+      },
+      "range": {
+        "start": 396,
+        "end": 472
+      }
+    }
+  },
+  {
+    "source": {
+      "label": "raise_error",
+      "file": "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\node-sources\\McBabe\\lib\\main.js",
+      "start": {
+        "row": 29,
+        "column": 0
+      },
+      "end": {
+        "row": 31,
+        "column": 1
+      },
+      "range": {
+        "start": 396,
+        "end": 472
+      }
+    },
+    "target": {
+      "label": "console_log",
+      "file": "Native",
+      "start": {
+        "row": null,
+        "column": null
+      },
+      "end": {
+        "row": null,
+        "column": null
+      },
+      "range": {
+        "start": null,
+        "end": null
+      }
+    }
+  },
+  {
+    "source": {
+      "label": "raise_error",
+      "file": "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\node-sources\\McBabe\\lib\\main.js",
+      "start": {
+        "row": 29,
+        "column": 0
+      },
+      "end": {
+        "row": 31,
+        "column": 1
+      },
+      "range": {
+        "start": 396,
+        "end": 472
+      }
+    },
+    "target": {
+      "label": "Math_log",
+      "file": "Native",
+      "start": {
+        "row": null,
+        "column": null
+      },
+      "end": {
+        "row": null,
+        "column": null
+      },
+      "range": {
+        "start": null,
+        "end": null
+      }
+    }
+  }
+]
