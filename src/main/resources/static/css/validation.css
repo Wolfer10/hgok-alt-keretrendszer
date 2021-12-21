@@ -3,3 +3,10 @@ pre{
     height: 300px;
     display: inline-block;
 }
+
+.container{
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+    border: 5px solid black;
+}

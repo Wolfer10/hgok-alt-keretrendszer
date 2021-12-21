@@ -17,14 +17,14 @@
         <th scope="col">Az státusza:</th>
         <th scope="col">Az eszközök:</th>
     </tr>
-    <tr style="border: 2px solid black" th:each = "analyis, iter : ${analysisList}">
+    <tr style="border: 2px solid black" th:each = "analysis, iter : ${analysisList}">
         <th scope="row" th:text="${iter.count}"> </th>
-        <td th:text="${analyis.getTimestamp()}"> </td>
-        <td th:text="${analyis.getStatus()}"> </td>
-        <td><span th:each="tool : ${analyis.getTools()}" th:text="${tool.getName()} + ', '"> </span></td>
+        <td th:text="${analysis.getTimestamp()}"> </td>
+        <td th:text="${analysis.getStatus()}"> </td>
+        <td><span th:each="tool : ${analysis.getTools()}" th:text="${tool.getName()} + ', '"> </span></td>
         <td>
             <button>
-                <a th:href="@{/validate/{analysisId}(analysisId=${analyis.getId()})}">Validálás</a>
+                <a th:href="@{/validate/{analysisId}/currlink/{id}(id=${analysis.getLinks().get(0).getId()},analysisId=${analysis.getId()})}">Validálás</a>
             </button>
         </td>
     </tr>

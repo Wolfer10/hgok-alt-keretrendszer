@@ -3,12 +3,15 @@ package com.hgok.webapp.edgeValidator;
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
 import com.hgok.webapp.compared.Link;
+import com.hgok.webapp.tool.Tool;
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class LinkValidatorController {
@@ -18,27 +21,42 @@ public class LinkValidatorController {
 
     LinkIterator<Link> linkIterator;
     Analysis analysis;
+    Long analysisId;
 
-    @GetMapping("/validate/{valid}/currLink/{id}")
-    public String showCodeSnippetsToValidate(@PathVariable("valid") Long id, Model model) {
+    @GetMapping("/validate/{analysisId}/currlink/{id}")
+    public String showCodeSnippetsToValidate(@PathVariable("analysisId") Long id, Model model) {
         init(id, model);
         return "validate-analysis";
     }
 
-    @GetMapping("/validate/{valid}/nextlink/{id}")
+    @GetMapping("/validate/{analysisId}/nextlink/{id}")
     public String stepForward() {
-        return String.format("redirect:/validate/%s/%s", analysis.getLinks(), linkIterator.next().getId());
+        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), linkIterator.next().getId());
     }
 
-    @GetMapping("/validate/{valid}/prevlink/{id}")
+    @GetMapping("/validate/{analysisId}/prevlink/{id}")
     public String stepBackwards() {
-        return String.format("redirect:/validate/%s/%s", analysis.getLinks(), linkIterator.previous().getId());
+        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), linkIterator.previous().getId());
     }
 
-    @PostMapping("/validate/link/{id}")
-    public String stepForward(@PathVariable("id") Long id, Model model) {
+    /*@PostMapping("/validate/{analysisId}/prevlink/{id}")
+    public void updateLink(@RequestParam(name = "valid-link") String linkValidness) {
+        Boolean isAccepted = BooleanUtils.toBooleanObject(linkValidness, "true", "false", "null");
+        linkIterator.current().setAccepted(isAccepted);
+    }*/
 
-        return "validate-analysis";
+    @PostMapping("/validate/end")
+    public String end() {
+        analysis.setLinks(linkIterator.getList());
+        analysis.setStatus("validated");
+        analysisRepository.save(analysis);
+        return "redirect:/index";
+    }
+
+    @PostMapping("/validateLink")
+    @ResponseBody
+    public void validateLink(@RequestParam(name = "valid_link") String validation){
+        linkIterator.current().setAccepted(validation);
     }
 
 
@@ -48,21 +66,27 @@ public class LinkValidatorController {
      * a modelnek átadjuk az első linket
      */
     private void init(@PathVariable("id") Long id, Model model) {
-        analysis = init_analysis(id);
-        init_iterator();
+        if(analysis == null || !analysisId.equals(id)){
+            analysisId = id;
+            analysis = init_analysis(id);
+            init_iterator();
+        }
         model.addAttribute("currentLink", linkIterator.current());
         init_model(model);
     }
+
     private void init_model(Model model) {
         model.addAttribute("linkIterator", linkIterator);
         model.addAttribute("analyis", analysis);
     }
+
     private void init_iterator() {
-        System.out.println(analysis.getLinks());
+        //System.out.println(analysis.getLinks());
         linkIterator = new LinkIterator<>(analysis.getLinks());
     }
+
     private Analysis init_analysis(@PathVariable("id") Long id) {
         return analysisRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
     }
 }

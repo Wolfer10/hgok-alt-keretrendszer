@@ -40,6 +40,6 @@ public class Link {
     @Column(columnDefinition="TEXT")
     private String sourceSnippet;
 
-    private boolean accepted;
+    private String accepted = "unchecked";
 
 }
