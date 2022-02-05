@@ -11,10 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Controller
 public class AnalysisController {
@@ -51,7 +49,7 @@ public class AnalysisController {
 
     @GetMapping("/listAnalysis")
     String showListAnalysis(Model model){
-        model.addAttribute("analysisList", analysisRepository.findAll());
+        model.addAttribute("analysisList", analysisService.getOrderedAnalysises());
         return "analysis-list";
     }
 

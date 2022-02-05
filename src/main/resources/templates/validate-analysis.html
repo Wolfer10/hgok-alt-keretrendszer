@@ -41,6 +41,10 @@
     <form th:if="${linkIterator.hasPrevious()}" th:action="@{/validate/{analysisId}/prevlink/{id}(id=${currentLink.getId()},analysisId=${analyis.getId()})}">
         <input type="submit" value="Előző" >
     </form>
+    <form th:if="${!linkIterator.hasNext()}" th:action="@{/validate/end}" method="post">
+        <input type="submit" value="Kész" >
+    </form>
+
     <script th:inline="javascript">
         function exucute_validation(){
             console.log("hello")

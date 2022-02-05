@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class AnalysisService {
@@ -29,7 +30,7 @@ public class AnalysisService {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    public final String WORKINGPATH = "src/main/resources/static/working-dir/";
+    private final String WORKINGPATH = "src/main/resources/static/working-dir/";
 
     @Autowired
     private AnalysisRepository analysisRepository;
@@ -40,20 +41,38 @@ public class AnalysisService {
     @Autowired
     private LinkService linkService;
 
+    public List<Analysis> getOrderedAnalysises(){
+        return StreamSupport.stream(analysisRepository.findAll().spliterator(), false)
+                .sorted(Comparator.comparing(Analysis::getTimestamp)).collect(Collectors.toList());
+    }
+
 
     public void startAnalysis(String[] toolNames) throws IOException {
+        List<Tool> filteredTools = filterTools(toolNames);
+
+        Analysis analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()));
+
+        analysisRepository.save(analysis);
+
+        filteredTools.forEach(filteredTool -> writeToolsResultToDirAndConvertIT(filteredTool.getArguments(), filteredTool.getName()));
+
+        executeComparition();
+
+        intitLabels(analysis);
+
+        analysisRepository.save(findAnalysisToUpdate(analysis));
+    }
+
+    private List<Tool> filterTools(String[] toolNames) {
         List<Tool> filteredTools = new ArrayList<>();
         List<Tool> tools = toolRepository.findAll();
         for (String name : toolNames) {
             filteredTools.addAll(tools.stream().filter(tool -> tool.getName().equals(name)).collect(Collectors.toList()));
         }
+        return filteredTools;
+    }
 
-        Analysis analysis = new Analysis(tools, "folyamatban", new Timestamp(System.currentTimeMillis()));
-
-        analysisRepository.save(analysis);
-
-        filteredTools.forEach(filteredTool -> startProcess(filteredTool.getArguments(), filteredTool.getName(), analysis));
-
+    private void executeComparition() {
         Exocutor.addToQueue(() -> {
             try {
                 compareAnalysises(WORKINGPATH);
@@ -61,7 +80,16 @@ public class AnalysisService {
                 e.printStackTrace();
             }
         });
+    }
 
+    private Analysis findAnalysisToUpdate(Analysis analysis) {
+        Analysis newAnalysis = analysisRepository.findById(analysis.getId())
+                .orElseThrow(() -> new EntityNotFoundException(analysis.getId().toString()));
+        newAnalysis.setStatus("kész");
+       return newAnalysis;
+    }
+
+    private void intitLabels(Analysis analysis) throws FileNotFoundException {
         ComparedTools comparedTools = getComparedToolsFromJson();
 
         initLinks(analysis, comparedTools);
@@ -75,10 +103,6 @@ public class AnalysisService {
             label.getLink().setSourceSnippet(ntoMSourceReader.readFromNToEnd(label.getSourceStartLine()));
             label.getLink().setTargetSnippet(ntoMTargetReader.readFromNToEnd(label.getTargetStartLine()));
         });
-        Analysis newAnalysis = analysisRepository.findById(analysis.getId())
-                .orElseThrow(() -> new EntityNotFoundException(analysis.getId().toString()));
-        newAnalysis.setStatus("kész");
-        analysisRepository.save(newAnalysis);
     }
 
 
@@ -101,32 +125,41 @@ public class AnalysisService {
     }
 
 
-    public void startProcess(String command, String name, Analysis analysis) {
-
-        String[] tokens = command.split(" ");
-
-        /**
-         *  Ezek csak a toolonkénti egy input (utána kellen több inputra is)
-         *  Kellene külön az elemzésre is (jelenleg oda írom ki kétszer)
-         */
+    public void writeToolsResultToDirAndConvertIT(String toolsCommand, String toolsName) {
+        // TODO
+        //  Ezek csak a toolonkénti egy input (utána kellen több inputra is)
+        //  Kellene külön az elemzésre is (jelenleg oda írom ki kétszer)
         Exocutor.addToQueue(() -> {
             try {
-                log.error(name + " kezdete");
-                Path toolWorkDirPath = Paths.get(WORKINGPATH + name);
-                Files.createDirectories(toolWorkDirPath);
-                ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
-                Process rawAnalysis = toolProcessBuilder.start();
-                byte[] result = rawAnalysis.getInputStream().readAllBytes();
-                //System.out.println(Arrays.toString(result));
-                // ez égetve lett call-graph helyett a file neve lesz
-                Path rawCgPath = Paths.get(WORKINGPATH + name + "/" + "call-graph" + ".cgtxt");
-                Files.write(rawCgPath, result);
-                convertRawAnalysis(toolWorkDirPath.toString());
-                log.error(name + "vége");
+                log.error(toolsName + "kezdete");
+
+                writeResultToDir(toolsName, getToolsResult(toolsCommand.split(" ")));
+
+                //python script írja a megadott mappába
+                convertResult(createDirectoryFromPath(toolsName));
+
+                log.error(toolsName + "vége");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void writeResultToDir(String toolsName, byte[] result) throws IOException {
+        Path rawCgPath = Paths.get(WORKINGPATH + toolsName + "/" + "call-graph" + ".cgtxt");
+        Files.write(rawCgPath, result);
+    }
+
+    private byte[] getToolsResult(String[] tokens) throws IOException {
+        ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
+        Process rawAnalysis = toolProcessBuilder.start();
+        return rawAnalysis.getInputStream().readAllBytes();
+    }
+
+    private Path createDirectoryFromPath(String name) throws IOException {
+        Path toolWorkDirPath = Paths.get(WORKINGPATH + name);
+        Files.createDirectories(toolWorkDirPath);
+        return toolWorkDirPath;
     }
 
 
@@ -134,19 +167,19 @@ public class AnalysisService {
         startHCGCompare(dir);
     }
 
-    private void convertRawAnalysis(String dir) throws IOException {
-        startHCGScript(dir);
+    private void convertResult(Path dir) throws IOException {
+        startHCGConvert(dir);
     }
 
-    private void startHCGScript(String dir) throws IOException {
-        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\jscg_convert2json.py", dir);
+    private void startHCGConvert(Path dir) throws IOException {
+        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "hcg/jscg_convert2json.py", dir.toString());
         Process convertProcess = convertProcessBuilder.start();
         String convertResult = new String(convertProcess.getInputStream().readAllBytes());
         //System.out.println(convertResult);
     }
 
     private void startHCGCompare(String dir) throws IOException {
-        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\jscg_compare_json.py", dir, "noentry", "nowrapper");
+        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "hcg/jscg_compare_json.py", dir, "noentry", "nowrapper");
         Process convertProcess = convertProcessBuilder.start();
         String convertResult = new String(convertProcess.getInputStream().readAllBytes());
         //System.out.println(convertResult);

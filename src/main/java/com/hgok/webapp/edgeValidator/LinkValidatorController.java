@@ -39,18 +39,12 @@ public class LinkValidatorController {
         return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), linkIterator.previous().getId());
     }
 
-    /*@PostMapping("/validate/{analysisId}/prevlink/{id}")
-    public void updateLink(@RequestParam(name = "valid-link") String linkValidness) {
-        Boolean isAccepted = BooleanUtils.toBooleanObject(linkValidness, "true", "false", "null");
-        linkIterator.current().setAccepted(isAccepted);
-    }*/
-
     @PostMapping("/validate/end")
     public String end() {
         analysis.setLinks(linkIterator.getList());
         analysis.setStatus("validated");
         analysisRepository.save(analysis);
-        return "redirect:/index";
+        return "redirect:/listAnalysis";
     }
 
     @PostMapping("/validateLink")
