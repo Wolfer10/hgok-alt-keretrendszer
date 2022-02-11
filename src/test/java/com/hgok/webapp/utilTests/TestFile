@@ -1,9 +1,0 @@
-function foo(){
-    var asd;
-}
-
-function bar(){
-  var asd;
-  var asd;
-  fo();
-}
