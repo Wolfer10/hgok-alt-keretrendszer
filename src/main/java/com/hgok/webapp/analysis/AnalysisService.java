@@ -1,28 +1,27 @@
 package com.hgok.webapp.analysis;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.hgok.webapp.compared.*;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
+import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.NtoMReader;
+import com.hgok.webapp.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
 
 @Service
 public class AnalysisService {
@@ -30,7 +29,7 @@ public class AnalysisService {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    private final String WORKINGPATH = "src/main/resources/static/working-dir/";
+    public final String WORKINGPATH = "src/main/resources/static/working-dir/";
 
     @Autowired
     private AnalysisRepository analysisRepository;
@@ -43,11 +42,11 @@ public class AnalysisService {
 
     public List<Analysis> getOrderedAnalysises(){
         return StreamSupport.stream(analysisRepository.findAll().spliterator(), false)
-                .sorted(Comparator.comparing(Analysis::getTimestamp)).collect(Collectors.toList());
+                .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
     }
 
 
-    public void startAnalysis(String[] toolNames) throws IOException {
+    public void startAnalysis(String[] toolNames) throws IOException, InterruptedException {
         List<Tool> filteredTools = filterTools(toolNames);
 
         Analysis analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()));
@@ -56,12 +55,20 @@ public class AnalysisService {
 
         filteredTools.forEach(filteredTool -> writeToolsResultToDirAndConvertIT(filteredTool.getArguments(), filteredTool.getName()));
 
-        executeComparition();
+        JsonUtil.dumpToolNamesIntoJson(filteredTools, WORKINGPATH);
 
-        intitLabels(analysis);
+        executeComparition(analysis).thenRun(() -> {
+            try {
+                analysisRepository.save(findAnalysisToUpdate(analysis));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
 
-        analysisRepository.save(findAnalysisToUpdate(analysis));
+
+
     }
+
 
     private List<Tool> filterTools(String[] toolNames) {
         List<Tool> filteredTools = new ArrayList<>();
@@ -72,27 +79,32 @@ public class AnalysisService {
         return filteredTools;
     }
 
-    private void executeComparition() {
-        Exocutor.addToQueue(() -> {
+    private CompletableFuture<?> executeComparition(Analysis analysis) {
+        return CompletableFuture.runAsync(() -> {
             try {
-                compareAnalysises(WORKINGPATH);
+                startHCGCompare(WORKINGPATH);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }, Exocutor.executor );
     }
 
-    private Analysis findAnalysisToUpdate(Analysis analysis) {
+    public Analysis findAnalysisToUpdate(Analysis analysis) throws FileNotFoundException {
         Analysis newAnalysis = analysisRepository.findById(analysis.getId())
                 .orElseThrow(() -> new EntityNotFoundException(analysis.getId().toString()));
         newAnalysis.setStatus("kész");
+        newAnalysis.setLinks(new ArrayList<>());
+        intitLabels(newAnalysis);
        return newAnalysis;
     }
 
-    private void intitLabels(Analysis analysis) throws FileNotFoundException {
-        ComparedTools comparedTools = getComparedToolsFromJson();
-
+    public void  intitLabels(Analysis analysis) throws FileNotFoundException {
+        log.error("INIT LABLES CALLED");
+        JsonUtil jsonUtil = new JsonUtil();
+        ComparedTools comparedTools = jsonUtil.getComparedToolsFromJson();
+        log.error(String.valueOf(comparedTools.getLinks().size()));
         initLinks(analysis, comparedTools);
+        log.error(String.valueOf(analysis.getLinks().size()));
 
         List<Label> labels = new ArrayList<>();
         analysis.getLinks().forEach(link -> labels.add(new Label(link.getLabel(), link)));
@@ -106,82 +118,58 @@ public class AnalysisService {
     }
 
 
-    /**
-     * Beolvas egy jsont
-     * Gson segítségével átkonvertálja convertedObject-é
-     */
-    private ComparedTools getComparedToolsFromJson() throws FileNotFoundException {
-        // TODO ez égetve lett call-graph helyett a file neve lesz
-        String content = new Scanner(new File("src/main/resources/static/working-dir/x-compared/call-graph.json"))
-                .useDelimiter("\\Z").next();
-
-        Gson g = new Gson();
-        JsonObject convertedObject = new Gson().fromJson(content, JsonObject.class);
-        return g.fromJson(convertedObject, ComparedTools.class);
-    }
-
-    public void initLinks(Analysis analysis, ComparedTools comparedTools) {
+    private void initLinks(Analysis analysis, ComparedTools comparedTools) {
         comparedTools.links.forEach(analysis::addLink);
     }
 
 
-    public void writeToolsResultToDirAndConvertIT(String toolsCommand, String toolsName) {
+    public void writeToolsResultToDirAndConvertIT(String toolsCommand, String toolName) {
         // TODO
         //  Ezek csak a toolonkénti egy input (utána kellen több inputra is)
         //  Kellene külön az elemzésre is (jelenleg oda írom ki kétszer)
         Exocutor.addToQueue(() -> {
             try {
-                log.error(toolsName + "kezdete");
-
-                writeResultToDir(toolsName, getToolsResult(toolsCommand.split(" ")));
-
-                //python script írja a megadott mappába
-                convertResult(createDirectoryFromPath(toolsName));
-
-                log.error(toolsName + "vége");
+                log.error(toolName + " kezdete");
+                FileHelper fileHelper = new FileHelper();
+                Path dir = fileHelper.createDirectoryFromName(WORKINGPATH, toolName);
+                fileHelper.writeBytesIntoNewDir(WORKINGPATH, toolName + "/" + "callgraph.cgtxt", getToolsResult(toolsCommand.split(" ")));
+                startHCGConvert(dir);
+                log.error(toolName + " vége");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
     }
 
-    private void writeResultToDir(String toolsName, byte[] result) throws IOException {
-        Path rawCgPath = Paths.get(WORKINGPATH + toolsName + "/" + "call-graph" + ".cgtxt");
-        Files.write(rawCgPath, result);
-    }
 
-    private byte[] getToolsResult(String[] tokens) throws IOException {
+
+    public byte[] getToolsResult(String[] tokens) throws IOException {
         ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
         Process rawAnalysis = toolProcessBuilder.start();
+        System.err.println( new String(rawAnalysis.getErrorStream().readAllBytes()));
         return rawAnalysis.getInputStream().readAllBytes();
-    }
 
-    private Path createDirectoryFromPath(String name) throws IOException {
-        Path toolWorkDirPath = Paths.get(WORKINGPATH + name);
-        Files.createDirectories(toolWorkDirPath);
-        return toolWorkDirPath;
     }
 
 
-    public void compareAnalysises(String dir) throws IOException {
-        startHCGCompare(dir);
-    }
-
-    private void convertResult(Path dir) throws IOException {
-        startHCGConvert(dir);
-    }
-
-    private void startHCGConvert(Path dir) throws IOException {
-        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "hcg/jscg_convert2json.py", dir.toString());
+    public void startHCGConvert(Path dir) throws IOException {
+        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "src/main/resources/hcg/jscg_convert2json.py", dir.toString());
         Process convertProcess = convertProcessBuilder.start();
         String convertResult = new String(convertProcess.getInputStream().readAllBytes());
-        //System.out.println(convertResult);
+        String error = new String(convertProcess.getErrorStream().readAllBytes());
+//        System.err.println(error);
+//        System.out.println(convertResult);
     }
 
-    private void startHCGCompare(String dir) throws IOException {
-        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "hcg/jscg_compare_json.py", dir, "noentry", "nowrapper");
+    public void startHCGCompare(String dir) throws IOException {
+        log.error("COMPARE CALLED");
+        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "src/main/resources/hcg/jscg_compare_json.py", dir, "noentry", "nowrapper");
         Process convertProcess = convertProcessBuilder.start();
-        String convertResult = new String(convertProcess.getInputStream().readAllBytes());
-        //System.out.println(convertResult);
+        String result = new String(convertProcess.getInputStream().readAllBytes());
+        String error = new String(convertProcess.getErrorStream().readAllBytes());
+        log.error("COMPARE ENDED");
+
+//        System.err.println(error);
+//        System.out.println(result);
     }
 }

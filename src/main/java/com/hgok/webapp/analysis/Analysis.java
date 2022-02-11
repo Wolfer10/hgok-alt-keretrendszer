@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Getter
 @Setter
@@ -48,6 +49,10 @@ public class Analysis {
 
     public void addLink(Link link) {
         links.add(link);
+    }
+
+    public Analysis(Long id) {
+       this.id = id;
     }
 
 }

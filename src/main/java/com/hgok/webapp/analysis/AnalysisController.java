@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Controller
@@ -25,6 +26,7 @@ public class AnalysisController {
     private AnalysisService analysisService;
     @Autowired
     private AnalysisRepository analysisRepository;
+
 
     @GetMapping("/startAnalysis")
     String showStartAnalysis(Model model){
@@ -41,9 +43,8 @@ public class AnalysisController {
 
     }
     @PostMapping("/startAnalysis")
-    String startAnalysis(@RequestParam(value = "name") String[] names) throws IOException {
+    String startAnalysis(@RequestParam(value = "name") String[] names) throws IOException, InterruptedException {
         analysisService.startAnalysis(names);
-
         return "redirect:/listAnalysis";
     }
 

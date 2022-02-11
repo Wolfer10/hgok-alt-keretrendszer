@@ -42,4 +42,7 @@ public class Tool {
         setEnvironmentArgs(tool.getEnvironmentArgs());
     }
 
+    public Tool(@NotBlank String name) {
+        this.name = name;
+    }
 }
