@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### hgok projekt ###
+/src/main/resources/static/working-dir
