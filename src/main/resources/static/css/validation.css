@@ -1,12 +1,29 @@
 pre{
-    width: 30%;
-    height: 300px;
+    width: max-content;
+    height: max-content;
     display: inline-block;
+    border: black solid 2px;
+    margin: 15px;
+    padding: 10px;
+    background: white;
 }
 
 .container{
     display: flex;
     flex-direction: row;
     justify-content: stretch;
-    border: 5px solid black;
+    /*border: 5px solid black;*/
+}
+.row-wrapper{
+    display: flex;
+    flex-direction: row;
+}
+
+.column-wrapper{
+    display: flex;
+    flex-direction: column;
+}
+
+form#validation-form {
+    margin: 15px 0;
 }
