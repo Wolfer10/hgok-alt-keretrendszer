@@ -11,11 +11,16 @@ public class NtoMReaderTests {
     @Test
     public void NtoEndreaderTest(){
         NtoMReader reader = new NtoMReader("F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\utilTests\\TestFile.js");
-        String expected = "function bar(){\r\n" +
-                "  var asd;\r\n" +
-                "  var asd;\r\n" +
-                "  fo();\r\n" +
-                "}";
+        String expected = "function bar(){\n" +
+                "    let asd = \"foo\";\n" +
+                "    foo(asd);\n" +
+                "}\n" +
+                "\n" +
+                "function main(){\n" +
+                "    let asd = \"foo\";\n" +
+                "    bar();\n" +
+                "    foo(asd)\n" +
+                "}\n";
         String result = reader.readFromNToEnd(5);
         assertEquals(expected, result);
     }

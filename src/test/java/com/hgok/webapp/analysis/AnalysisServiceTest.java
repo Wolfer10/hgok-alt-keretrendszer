@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnalysisServiceTest {
 
-    @Test
-    void testInitLinks() throws FileNotFoundException {
+
+    void testInitLinks() {
         AnalysisService analysisService = new AnalysisService();
         Analysis analysis = new Analysis(186L);
-        analysis.setLinks(new ArrayList<>());
-        analysisService.intitLabels(analysis);
+        //analysis.getComparedAnalysis().setLinks(new ArrayList<>());
+        //analysisService.setLinkSourceAndTarget();
     }
 }
