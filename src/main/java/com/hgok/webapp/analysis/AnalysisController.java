@@ -1,6 +1,7 @@
 package com.hgok.webapp.analysis;
 
 
+import com.hgok.webapp.compared.LinkState;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
 import org.slf4j.Logger;
@@ -51,6 +52,9 @@ public class AnalysisController {
     @GetMapping("/listAnalysis")
     String showListAnalysis(Model model){
         model.addAttribute("analysisList", analysisService.getOrderedAnalysises());
+        model.addAttribute("accepted", LinkState.ACCEPTED);
+        model.addAttribute("denied",LinkState.DENIED);
+        model.addAttribute("unchecked",LinkState.UNCHECKED);
         return "analysis-list";
     }
 
