@@ -22,6 +22,9 @@ public class LinkValidatorController {
     @GetMapping("/validate/{analysisId}/currlink/{id}")
     public String showCodeSnippetsToValidate(@PathVariable("analysisId") Long id, Model model) {
         init(id, model);
+        model.addAttribute("accepted", LinkState.ACCEPTED);
+        model.addAttribute("denied",LinkState.DENIED);
+        model.addAttribute("unchecked",LinkState.UNCHECKED);
         return "validate-analysis";
     }
 
@@ -46,7 +49,17 @@ public class LinkValidatorController {
     @PostMapping("/validateLink")
     @ResponseBody
     public void validateLink(@RequestParam(name = "valid_link") String validation){
-        linkIterator.current().setAccepted(validation);
+        switch (validation) {
+            case "unchecked":
+                linkIterator.current().setState(LinkState.UNCHECKED);
+                break;
+            case "accepted" :
+                linkIterator.current().setState(LinkState.ACCEPTED);
+                break;
+            case "denied":
+                linkIterator.current().setState(LinkState.DENIED);
+                break;
+        }
     }
 
 
