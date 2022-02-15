@@ -40,6 +40,7 @@ public class Link {
     @Column(columnDefinition="TEXT")
     private String sourceSnippet;
 
-    private String accepted = "unchecked";
+    @Enumerated(value = EnumType.STRING)
+    private LinkState state = LinkState.UNCHECKED;
 
 }

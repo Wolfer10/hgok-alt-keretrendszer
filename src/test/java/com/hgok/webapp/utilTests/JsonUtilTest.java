@@ -1,7 +1,6 @@
 package com.hgok.webapp.utilTests;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.hgok.webapp.compared.ComparedTools;
+import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.util.JsonUtil;
 import org.junit.Assert;
@@ -29,9 +28,7 @@ public class JsonUtilTest {
 
     @Test
     public void test() throws IOException {
-
-        JsonUtil jsonUtil = new JsonUtil();
-        ComparedTools comparedTools = jsonUtil.getComparedToolsFromJson();
+        ComparedAnalysis comparedTools = JsonUtil.getComparedToolsFromJson();
         Assert.assertNotNull(comparedTools);
         Assert.assertTrue(comparedTools.getLinks().size() > 0);
         System.out.println(comparedTools.getLinks());

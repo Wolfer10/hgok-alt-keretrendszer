@@ -3,15 +3,11 @@ package com.hgok.webapp.edgeValidator;
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
 import com.hgok.webapp.compared.Link;
-import com.hgok.webapp.tool.Tool;
-import org.apache.commons.lang.BooleanUtils;
+import com.hgok.webapp.compared.LinkState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class LinkValidatorController {
@@ -41,7 +37,7 @@ public class LinkValidatorController {
 
     @PostMapping("/validate/end")
     public String end() {
-        analysis.setLinks(linkIterator.getList());
+        analysis.getComparedAnalysis().setLinks(linkIterator.getList());
         analysis.setStatus("validated");
         analysisRepository.save(analysis);
         return "redirect:/listAnalysis";
@@ -76,7 +72,7 @@ public class LinkValidatorController {
 
     private void init_iterator() {
         //System.out.println(analysis.getLinks());
-        linkIterator = new LinkIterator<>(analysis.getLinks());
+        linkIterator = new LinkIterator<>(analysis.getComparedAnalysis().getLinks());
     }
 
     private Analysis init_analysis(@PathVariable("id") Long id) {

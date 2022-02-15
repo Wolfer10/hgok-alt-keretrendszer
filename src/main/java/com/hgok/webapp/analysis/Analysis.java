@@ -1,5 +1,6 @@
 package com.hgok.webapp.analysis;
 
+import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.tool.Tool;
 import lombok.AllArgsConstructor;
@@ -30,10 +31,10 @@ public class Analysis {
             cascade = CascadeType.ALL)
     private List<Tool> tools;
 
-    @OneToMany(
+    @OneToOne(
             orphanRemoval = true,
             cascade = CascadeType.ALL)
-    private List<Link> links;
+    private ComparedAnalysis comparedAnalysis;
 
     private String status;
 
@@ -44,11 +45,6 @@ public class Analysis {
         this.tools = tools;
         this.status = status;
         this.timestamp = timestamp;
-        links = new ArrayList<>();
-    }
-
-    public void addLink(Link link) {
-        links.add(link);
     }
 
     public Analysis(Long id) {

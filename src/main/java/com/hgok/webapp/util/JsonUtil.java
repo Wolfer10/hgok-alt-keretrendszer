@@ -3,7 +3,7 @@ package com.hgok.webapp.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.hgok.webapp.compared.ComparedTools;
+import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.tool.Tool;
 
 import java.io.File;
@@ -30,17 +30,17 @@ public class JsonUtil {
      * Beolvas egy jsont
      * Gson segítségével átkonvertálja convertedObject-é
      */
-    public ComparedTools getComparedToolsFromJson() throws FileNotFoundException {
+    public static ComparedAnalysis getComparedToolsFromJson() throws FileNotFoundException {
         // TODO ez égetve lett call-graph helyett a file neve lesz
         String content = new Scanner(new File("src/main/resources/static/working-dir/x-compared/callgraph.json"))
                 .useDelimiter("\\Z").next();
 
         Gson g = new Gson();
         JsonObject convertedObject = new Gson().fromJson(content, JsonObject.class);
-        return g.fromJson(convertedObject, ComparedTools.class);
+        return g.fromJson(convertedObject, ComparedAnalysis.class);
     }
 
-    public static  <T> String mapToJson(Map<T, T> map){
+    public static <T> String mapToJson(Map<T, T> map){
         Gson g = new Gson();
         Type listType = new TypeToken<Map<String, String>>() {}.getType();
         return g.toJson(map, listType);

@@ -37,8 +37,6 @@ public class AnalysisService {
     @Autowired
     private ToolRepository toolRepository;
 
-    @Autowired
-    private LinkService linkService;
 
     public List<Analysis> getOrderedAnalysises(){
         return StreamSupport.stream(analysisRepository.findAll().spliterator(), false)
@@ -53,17 +51,13 @@ public class AnalysisService {
 
         analysisRepository.save(analysis);
 
-        filteredTools.forEach(filteredTool -> writeToolsResultToDirAndConvertIT(filteredTool.getArguments(), filteredTool.getName()));
+        filteredTools.forEach(filteredTool -> writeToolsResultToDirAndConvertIT(filteredTool.getArguments(), filteredTool.getName())
+                .exceptionally((ex) -> {System.out.println(ex.getMessage()); return null;}));
 
         JsonUtil.dumpToolNamesIntoJson(filteredTools, WORKINGPATH);
 
-        executeComparition(analysis).thenRun(() -> {
-            try {
-                analysisRepository.save(findAnalysisToUpdate(analysis));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        });
+        executeComparison().exceptionally((ex) -> {System.out.println(ex.getMessage()); return null;})
+                .thenRun(() ->  analysisRepository.save(updateAnalysis(analysis)) );
 
 
 
@@ -79,7 +73,7 @@ public class AnalysisService {
         return filteredTools;
     }
 
-    private CompletableFuture<?> executeComparition(Analysis analysis) {
+    private CompletableFuture<Void> executeComparison() {
         return CompletableFuture.runAsync(() -> {
             try {
                 startHCGCompare(WORKINGPATH);
@@ -89,26 +83,26 @@ public class AnalysisService {
         }, Exocutor.executor );
     }
 
-    public Analysis findAnalysisToUpdate(Analysis analysis) throws FileNotFoundException {
+    public Analysis updateAnalysis(Analysis analysis)  {
         Analysis newAnalysis = analysisRepository.findById(analysis.getId())
                 .orElseThrow(() -> new EntityNotFoundException(analysis.getId().toString()));
-        newAnalysis.setStatus("kész");
-        newAnalysis.setLinks(new ArrayList<>());
-        intitLabels(newAnalysis);
+
+        ComparedAnalysis comparedAnalysis = null;
+        try {
+            comparedAnalysis = JsonUtil.getComparedToolsFromJson();
+            comparedAnalysis.setValidationTime(newAnalysis.getTimestamp());
+            setLinkSourceAndTarget(comparedAnalysis);
+            newAnalysis.setComparedAnalysis(comparedAnalysis);
+            newAnalysis.setStatus("kész");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
        return newAnalysis;
     }
 
-    public void  intitLabels(Analysis analysis) throws FileNotFoundException {
-        log.error("INIT LABLES CALLED");
-        JsonUtil jsonUtil = new JsonUtil();
-        ComparedTools comparedTools = jsonUtil.getComparedToolsFromJson();
-        log.error(String.valueOf(comparedTools.getLinks().size()));
-        initLinks(analysis, comparedTools);
-        log.error(String.valueOf(analysis.getLinks().size()));
-
+    public void setLinkSourceAndTarget(ComparedAnalysis comparedAnalysis) {
         List<Label> labels = new ArrayList<>();
-        analysis.getLinks().forEach(link -> labels.add(new Label(link.getLabel(), link)));
-
+        comparedAnalysis.getLinks().forEach(link -> labels.add(new Label(link.getLabel(), link)));
         labels.forEach(label -> {
             NtoMReader ntoMSourceReader = new NtoMReader(label.getSourceFileName());
             NtoMReader ntoMTargetReader = new NtoMReader(label.getTargetFileName());
@@ -117,17 +111,11 @@ public class AnalysisService {
         });
     }
 
-
-    private void initLinks(Analysis analysis, ComparedTools comparedTools) {
-        comparedTools.links.forEach(analysis::addLink);
-    }
-
-
-    public void writeToolsResultToDirAndConvertIT(String toolsCommand, String toolName) {
+    public CompletableFuture<?> writeToolsResultToDirAndConvertIT(String toolsCommand, String toolName) {
         // TODO
         //  Ezek csak a toolonkénti egy input (utána kellen több inputra is)
         //  Kellene külön az elemzésre is (jelenleg oda írom ki kétszer)
-        Exocutor.addToQueue(() -> {
+        return CompletableFuture.runAsync(() -> {
             try {
                 log.error(toolName + " kezdete");
                 FileHelper fileHelper = new FileHelper();
@@ -138,7 +126,7 @@ public class AnalysisService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }, Exocutor.executor );
     }
 
 

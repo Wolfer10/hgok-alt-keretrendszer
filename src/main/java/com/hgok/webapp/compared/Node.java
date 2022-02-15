@@ -2,6 +2,8 @@ package com.hgok.webapp.compared;
 
 import java.util.List;
 import javax.annotation.Generated;
+import javax.persistence.*;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
@@ -9,11 +11,18 @@ import lombok.Setter;
 
 @Setter
 @Getter
+@Entity
 public class Node {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Expose (serialize = false, deserialize = false)
+    private Long generatedId;
 
     @SerializedName("id")
     @Expose
-    public Long id;
+    public Long number;
+
     @SerializedName("label")
     @Expose
     public String label;
@@ -28,6 +37,7 @@ public class Node {
     public Boolean _final;
     @SerializedName("foundBy")
     @Expose
+    @ElementCollection
     public List<String> foundBy = null;
 
 }
