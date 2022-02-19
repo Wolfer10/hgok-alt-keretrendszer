@@ -24,10 +24,12 @@ public class ComparedAnalysisController {
     private ComparedAnalysisService comparedAnalysisService;
 
     Analysis actualAnalysis;
+    Long analysisId;
 
     @GetMapping("/statistics/{analysisId}")
     public String showStats(@PathVariable("analysisId") Long id, Model model) {
-        if(actualAnalysis == null){
+        if(actualAnalysis == null || !analysisId.equals(id)){
+            analysisId = id;
             actualAnalysis = analysisRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
             actualAnalysis.getComparedAnalysis().setMetricContainers(comparedAnalysisService.getToolMetrics(actualAnalysis));
