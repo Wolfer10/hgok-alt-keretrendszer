@@ -1,0 +1,56 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "nodes": [
+    {
+      "id": 0,
+      "label": "<entry>",
+      "pos": "<entry>",
+      "entry": true,
+      "final": true,
+      "foundBy": [
+        "ACG-NONE"
+      ]
+    },
+    {
+      "id": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js@10",
+      "pos": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js:10:1",
+      "entry": false,
+      "final": false,
+      "foundBy": [
+        "ACG-NONE"
+      ]
+    },
+    {
+      "id": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js@5",
+      "pos": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js:5:1",
+      "entry": false,
+      "final": false,
+      "foundBy": [
+        "ACG-NONE"
+      ]
+    },
+    {
+      "id": 3,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js@1",
+      "pos": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js:1:1",
+      "entry": false,
+      "final": true,
+      "foundBy": [
+        "ACG-NONE"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": 2,
+      "source": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js:10:1->F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/main/resources/static/working-dir/sourceFiles/TestFile.js:5:1",
+      "foundBy": [
+        "ACG-NONE"
+      ]
+    }
+  ]
+}

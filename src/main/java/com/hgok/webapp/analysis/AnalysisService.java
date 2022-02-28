@@ -4,22 +4,23 @@ import com.hgok.webapp.compared.*;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
 import com.hgok.webapp.util.FileHelper;
-import com.hgok.webapp.util.NtoMReader;
 import com.hgok.webapp.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
@@ -29,7 +30,7 @@ public class AnalysisService {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    public final String WORKINGPATH = "src/main/resources/static/working-dir/";
+    public static final String WORKINGPATH = "src/main/resources/static/working-dir/";
 
     @Autowired
     private AnalysisRepository analysisRepository;
@@ -44,24 +45,50 @@ public class AnalysisService {
     }
 
 
-    public void startAnalysis(String[] toolNames) throws IOException, InterruptedException {
+    public void startAnalysis(String[] toolNames, MultipartFile analysisFile) throws IOException, ExecutionException, InterruptedException {
+
         List<Tool> filteredTools = filterTools(toolNames);
 
         Analysis analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()));
 
         analysisRepository.save(analysis);
 
-        filteredTools.forEach(filteredTool -> writeToolsResultToDirAndConvertIT(filteredTool.getArguments(), filteredTool.getName())
-                .exceptionally((ex) -> {System.out.println(ex.getMessage()); return null;}));
+        FileHelper fileHelper = new FileHelper();
+
+        List<Path> filePaths = new ArrayList<>();
+
+        fileHelper.saveFile(FileHelper.SOURCE_FOLDER, analysisFile);
+
+        filePaths.add(fileHelper.getFilePath());
+
+        runEachToolsOnEachFiles(filteredTools, filePaths);
 
         JsonUtil.dumpToolNamesIntoJson(filteredTools, WORKINGPATH);
 
-        executeComparison().exceptionally((ex) -> {System.out.println(ex.getMessage()); return null;})
-                .thenRun(() ->  analysisRepository.save(updateAnalysis(analysis)) );
 
+        analysis.setFileNames(filePaths.stream().map(filePath -> filePath.getFileName().toString()).collect(Collectors.toList()));
 
+        executeComparison()
+                .thenRun(() -> analysisRepository.save(analysis.updateAnalysis()))
+                .exceptionally((ex) -> {ex.printStackTrace(System.err); return null;}).get();
 
     }
+
+    private void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths) throws IOException {
+        for (Tool filteredTool : filteredTools) {
+            for (Path filePath : filePaths) {
+                String[] tempTokens = new String[]{ filteredTool.getCompilerNameFromTool(), filteredTool.getPath(), };
+                String[] tokens = Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(filteredTool.getArguments(), filePath).split(" ")))
+                        .toArray(String[]::new);
+
+                byte[] toolResult = getToolsResult(tokens);
+
+                Path toolResultDir = writeToolResultToDir(WORKINGPATH, filteredTool, filePath.getFileName().toString(), toolResult);
+                executeConversion(filteredTool.getName(), toolResultDir).completeExceptionally(new RuntimeException());
+            }
+        }
+    }
+
 
 
     private List<Tool> filterTools(String[] toolNames) {
@@ -83,44 +110,10 @@ public class AnalysisService {
         }, Exocutor.executor );
     }
 
-    public Analysis updateAnalysis(Analysis analysis)  {
-        Analysis newAnalysis = analysisRepository.findById(analysis.getId())
-                .orElseThrow(() -> new EntityNotFoundException(analysis.getId().toString()));
-
-        ComparedAnalysis comparedAnalysis = null;
-        try {
-            comparedAnalysis = JsonUtil.getComparedToolsFromJson();
-            comparedAnalysis.setValidationTime(newAnalysis.getTimestamp());
-            setLinkSourceAndTarget(comparedAnalysis);
-            newAnalysis.setComparedAnalysis(comparedAnalysis);
-            newAnalysis.setStatus("kész");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-       return newAnalysis;
-    }
-
-    public void setLinkSourceAndTarget(ComparedAnalysis comparedAnalysis) {
-        List<Label> labels = new ArrayList<>();
-        comparedAnalysis.getLinks().forEach(link -> labels.add(new Label(link.getLabel(), link)));
-        labels.forEach(label -> {
-            NtoMReader ntoMSourceReader = new NtoMReader(label.getSourceFileName());
-            NtoMReader ntoMTargetReader = new NtoMReader(label.getTargetFileName());
-            label.getLink().setSourceSnippet(ntoMSourceReader.readFromNToEnd(label.getSourceStartLine()));
-            label.getLink().setTargetSnippet(ntoMTargetReader.readFromNToEnd(label.getTargetStartLine()));
-        });
-    }
-
-    public CompletableFuture<?> writeToolsResultToDirAndConvertIT(String toolsCommand, String toolName) {
-        // TODO
-        //  Ezek csak a toolonkénti egy input (utána kellen több inputra is)
-        //  Kellene külön az elemzésre is (jelenleg oda írom ki kétszer)
+    public CompletableFuture<?> executeConversion(String toolName, Path dir) {
         return CompletableFuture.runAsync(() -> {
             try {
                 log.error(toolName + " kezdete");
-                FileHelper fileHelper = new FileHelper();
-                Path dir = fileHelper.createDirectoryFromName(WORKINGPATH, toolName);
-                fileHelper.writeBytesIntoNewDir(WORKINGPATH, toolName + "/" + "callgraph.cgtxt", getToolsResult(toolsCommand.split(" ")));
                 startHCGConvert(dir);
                 log.error(toolName + " vége");
             } catch (IOException e) {
@@ -129,14 +122,21 @@ public class AnalysisService {
         }, Exocutor.executor );
     }
 
+    public Path writeToolResultToDir(String path, Tool tool, String fileName, byte[] result) throws IOException {
+        FileHelper fileHelper = new FileHelper();
+        Path dir = fileHelper.createDirectoryFromName(path, tool.getName());
+        fileHelper.writeBytesIntoNewDir(path, tool.getName() + "/" + fileName.split("\\.")[0] + ".cgtxt", result);
+        return dir;
+    }
 
 
-    public byte[] getToolsResult(String[] tokens) throws IOException {
+    public byte[] getToolsResult(String... tokens) throws IOException {
+
         ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
         Process rawAnalysis = toolProcessBuilder.start();
-        System.err.println( new String(rawAnalysis.getErrorStream().readAllBytes()));
+        //System.err.println( new String(rawAnalysis.getErrorStream().readAllBytes()));
+        //System.out.println( new String(rawAnalysis.getInputStream().readAllBytes()));
         return rawAnalysis.getInputStream().readAllBytes();
-
     }
 
 
@@ -156,7 +156,6 @@ public class AnalysisService {
         String result = new String(convertProcess.getInputStream().readAllBytes());
         String error = new String(convertProcess.getErrorStream().readAllBytes());
         log.error("COMPARE ENDED");
-
 //        System.err.println(error);
 //        System.out.println(result);
     }

@@ -14,7 +14,7 @@ public class BrowserLauncher{
         System.setProperty("java.awt.headless", "false");
         Desktop desktop = Desktop.getDesktop();
         try{
-            desktop.browse(new URI("http://localhost:8080"));
+            //desktop.browse(new URI("http://localhost:8080"));
         }catch(Exception e){
            e.printStackTrace();
         }

@@ -9,7 +9,7 @@
 
 <div th:insert="header :: navbar"></div>
 <script src="js/jquery-3.6.0.min.js"></script>
-<form  action="#" th:action="@{/startAnalysis}" method="post">
+<form  action="#" th:action="@{/startAnalysis}" enctype="multipart/form-data" method="post">
     <div class="form-group">
         <label for="ln-selector"></label>
         <select id="ln-selector" name="language">
@@ -18,7 +18,7 @@
     </div>
 
     <div class="form-check" id="checkOBox"></div>
-    <input id="input" type="file" name="input">
+    <input id="input" type="file" name="file">
     <input type="submit" value="Elemzés indítása">
 </form>
 <script th:inline="javascript">

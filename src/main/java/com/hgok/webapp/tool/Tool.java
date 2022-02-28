@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.util.Locale;
 
 @AllArgsConstructor
 @Entity
@@ -44,5 +45,13 @@ public class Tool {
 
     public Tool(@NotBlank String name) {
         this.name = name;
+    }
+
+    public String getCompilerNameFromTool() {
+        String compilerName = "";
+        if(language.toLowerCase(Locale.ROOT).contains("javascript")){
+            compilerName = "node";
+        }
+        return compilerName;
     }
 }

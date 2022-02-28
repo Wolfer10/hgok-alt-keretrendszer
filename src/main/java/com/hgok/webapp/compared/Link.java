@@ -35,9 +35,9 @@ public class Link {
     @ElementCollection
     private List<String> foundBy = null;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="text")
     private String targetSnippet;
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="text")
     private String sourceSnippet;
 
     @Enumerated(value = EnumType.STRING)

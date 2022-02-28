@@ -10,8 +10,7 @@
 <body>
 
 <div th:insert="header :: navbar"></div>
-
-<table id="prec-table" class="table">
+<table id="prec-table" class="table" th:each="compared : ${compareds}">
     <tr>
         <th scope="col">Az eszköz</th>
         <th scope="col">A helyesen eltalált élek száma:</th>
@@ -21,24 +20,40 @@
         <th scope="col">Pontosság</th>
         <th scope="col">F-mesure</th>
     </tr>
-    <tr th:each="metric : ${metrics} ">
+    <tr th:each="metric :  ${compared.getMetricContainers()}">
         <td th:text="${metric.getToolName()}" > </td>
         <td th:text="${metric.getTruePositive()}" > </td>
         <td th:text="${metric.getAll()}" > </td>
         <td th:text="${metric.getOurTruePositive()}" > </td>
-        <td th:text="${Math.floor(metric.getPrecision()) * 100}" > </td>
-<!--        TODO ceil ez rossz%-->
+        <td th:text="${metric.getPrecision() * 100}" > </td>
+<!--        TODO: ceil -->
         <td th:text="${metric.getRecall() * 100} + '%'" > </td>
         <td th:text="${metric.getFMeasure() * 100} + '%'"  > </td>
     </tr>
     <caption>Precizitás és pontosság metrikái az eszközönöknek</caption>
+    <form id="update-our-true-positive" action="#" method="POST" th:action="@{/calculateStats}">
+        <label>
+            Az általunk talált helyes élek száma:
+            <input type="number" name="ourPositive">
+        </label>
+        <input type="hidden" name="id" th:value="${compared.getId()}">
+        <input type="submit" value="frissíts!">
+    </form>
 </table>
-<form id="update-our-true-positive" action="#" method="POST" th:action="@{/calculateStats}">
-    <label>
-        Az általunk talált helyes élek száma:
-        <input type="number" name="ourPositive">
-    </label>
-    <input type="submit" value="frissíts!">
-</form>
 
 </body>
+
+<svg id="my_dataviz" width="960" height="960"></svg>
+<script src="https://cdn.jsdelivr.net/npm/d3-path@3"></script>
+<script>
+
+
+    const matrix = [
+        [11975,  5871, 8916, 2868],
+        [ 1951, 10048, 2060, 6171],
+        [ 8010, 16145, 8090, 8045],
+        [ 1013,   990,  940, 6907]
+    ];
+    const chord = d3.chord();
+
+</script>

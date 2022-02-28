@@ -2,12 +2,16 @@ package com.hgok.webapp.edgeValidator;
 
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
+import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.compared.LinkState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Controller
 public class LinkValidatorController {
@@ -40,7 +44,9 @@ public class LinkValidatorController {
 
     @PostMapping("/validate/end")
     public String end() {
-        analysis.getComparedAnalysis().setLinks(linkIterator.getList());
+        for(ComparedAnalysis comparedAnalysis : analysis.getComparedAnalysises()) {
+            comparedAnalysis.setLinks(linkIterator.getList());
+        }
         analysis.setStatus("validated");
         analysisRepository.save(analysis);
         return "redirect:/listAnalysis";
@@ -69,11 +75,11 @@ public class LinkValidatorController {
      * a modelnek átadjuk az első linket
      */
     private void init(@PathVariable("id") Long id, Model model) {
-        if(analysis == null || !analysisId.equals(id)){
-            analysisId = id;
+        //if(analysis == null || !analysisId.equals(id)){
+            //analysisId = id;
             analysis = init_analysis(id);
             init_iterator();
-        }
+        //}
         model.addAttribute("currentLink", linkIterator.current());
         init_model(model);
     }
@@ -85,7 +91,7 @@ public class LinkValidatorController {
 
     private void init_iterator() {
         //System.out.println(analysis.getLinks());
-        linkIterator = new LinkIterator<>(analysis.getComparedAnalysis().getLinks());
+        linkIterator = new LinkIterator<>(analysis.getComparedAnalysises().stream().map(ComparedAnalysis::getLinks).flatMap(Collection::stream).collect(Collectors.toList()));
     }
 
     private Analysis init_analysis(@PathVariable("id") Long id) {

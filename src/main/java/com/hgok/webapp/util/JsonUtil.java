@@ -30,9 +30,8 @@ public class JsonUtil {
      * Beolvas egy jsont
      * Gson segítségével átkonvertálja convertedObject-é
      */
-    public static ComparedAnalysis getComparedToolsFromJson() throws FileNotFoundException {
-        // TODO ez égetve lett call-graph helyett a file neve lesz
-        String content = new Scanner(new File("src/main/resources/static/working-dir/x-compared/callgraph.json"))
+    public static ComparedAnalysis getComparedToolsFromJson(String filePath) throws FileNotFoundException {
+        String content = new Scanner(new File(filePath))
                 .useDelimiter("\\Z").next();
 
         Gson g = new Gson();
