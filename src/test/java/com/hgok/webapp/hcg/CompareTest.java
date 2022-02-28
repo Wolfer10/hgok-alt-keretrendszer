@@ -16,7 +16,7 @@ public class CompareTest {
    @Test
     public void testJsonFileExits() throws IOException {
         AnalysisService analysisService = new AnalysisService();
-        analysisService.startHCGCompare(analysisService.WORKINGPATH);
+        analysisService.startHCGCompare(AnalysisService.WORKINGPATH);
         Assertions.assertTrue(Path.of(COMPARED_DIR).toFile().exists());
         Assertions.assertTrue(Path.of(COMPARED_DIR, "callgraph.json").toFile().exists());
     }

@@ -13,9 +13,9 @@ public class ConvertTest {
     public void testJsonFileExits() throws IOException {
         AnalysisService analysisService = new AnalysisService();
         String dirName = "test NONE";
-        Path path = Path.of(analysisService.WORKINGPATH, dirName);
+        Path path = Path.of(AnalysisService.WORKINGPATH, dirName);
         analysisService.startHCGConvert(path);
-        Assertions.assertTrue(Path.of(analysisService.WORKINGPATH, dirName, "callgraph.json").toFile().exists());
+        Assertions.assertTrue(Path.of(AnalysisService.WORKINGPATH, dirName, "callgraph.json").toFile().exists());
     }
 
 
