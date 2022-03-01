@@ -1,9 +1,8 @@
-package com.hgok.webapp.utilTests;
+package com.hgok.webapp.util;
 
 import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.util.JsonUtil;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hgok.webapp.utilTests.FileHelperTest.TESTDIR;
+import static com.hgok.webapp.util.FileHelperTest.TESTDIR;
 
 public class JsonUtilTest {
 

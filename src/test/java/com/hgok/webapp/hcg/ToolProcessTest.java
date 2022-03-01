@@ -4,6 +4,7 @@ import com.hgok.webapp.analysis.AnalysisService;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.util.FileHelper;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -14,15 +15,21 @@ import java.util.stream.Stream;
 public class ToolProcessTest {
 
 
-    public static final String[] TOKENS_RELATIVE = "node F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\util\\js-callgraph\\js-callgraph.js --strategy NONE --cg src\\test\\java\\com\\hgok\\webapp\\utilTests\\TestFile.js".split(" ");
+    public static final String[] TOKENS_RELATIVE = "node F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\util\\js-callgraph\\js-callgraph.js --strategy NONE --cg src\\test\\java\\com\\hgok\\webapp\\util\\TestFile.js".split(" ");
     public static final String HCG_TESTDIR = "src/test/java/com/hgok/webapp/hcg/testdir/";
+
+    ProcessHandler processHandler;
+    @BeforeEach
+    public void init(){
+        processHandler = new ProcessHandler();
+    }
+
 
     @Test
     public void testGetToolsResult() throws IOException {
-        AnalysisService analysisService = new AnalysisService();
-        String[] tokens = "node F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\util\\js-callgraph\\js-callgraph.js --strategy NONE --cg F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\utilTests\\TestFile.js".split(" ");
+        String[] tokens = "node F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\util\\js-callgraph\\js-callgraph.js --strategy NONE --cg F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\util\\TestFile.js".split(" ");
         //Path path = Path.of(analysisService.WORKINGPATH, dirName);
-        Assertions.assertTrue(analysisService.getToolsResult(tokens).length > 0);
+        Assertions.assertTrue(processHandler.getToolsResult(tokens).length > 0);
         //Assert.assertTrue(Path.of(analysisService.WORKINGPATH, dirName, "callgraph.json").toFile().exists());
     }
 
@@ -30,7 +37,7 @@ public class ToolProcessTest {
     public void testWithRelativePath() throws IOException {
         AnalysisService analysisService = new AnalysisService();
         //Path path = Path.of(analysisService.WORKINGPATH, dirName);
-        Assertions.assertTrue(analysisService.getToolsResult(TOKENS_RELATIVE).length > 0);
+        Assertions.assertTrue(processHandler.getToolsResult(TOKENS_RELATIVE).length > 0);
         //Assert.assertTrue(Path.of(analysisService.WORKINGPATH, dirName, "callgraph.json").toFile().exists());
     }
 
@@ -39,10 +46,10 @@ public class ToolProcessTest {
         AnalysisService analysisService = new AnalysisService();
         Tool tool = new Tool();
         tool.setName("TEST-TOOL");
-        byte[] expected = analysisService.getToolsResult(TOKENS_RELATIVE);
+        byte[] expected = processHandler.getToolsResult(TOKENS_RELATIVE);
         Path path = analysisService.writeToolResultToDir(HCG_TESTDIR, tool, "alma", expected);
         Assertions.assertTrue(path.toFile().exists());
-        Assertions.assertTrue(analysisService.getToolsResult(TOKENS_RELATIVE).length > 0);
+        Assertions.assertTrue(processHandler.getToolsResult(TOKENS_RELATIVE).length > 0);
         //AssertFromFile(path, expected);
     }
 
@@ -52,14 +59,14 @@ public class ToolProcessTest {
         Tool tool = new Tool();
         tool.setName("TEST-TOOL");
         tool.setLanguage("Javascript");
-        tool.setArguments(String.format("--strategy NONE --cg %s", "src\\test\\java\\com\\hgok\\webapp\\utilTests\\TestFile.js"));
+        tool.setArguments(String.format("--strategy NONE --cg %s", "src\\test\\java\\com\\hgok\\webapp\\util\\TestFile.js"));
         tool.setPath("F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\util\\js-callgraph\\js-callgraph.js");
         String[] tempTokens = new String[]{ tool.getCompilerNameFromTool(), tool.getPath(), };
 
         String[] both = Stream.concat(Arrays.stream(tempTokens), Arrays.stream(tool.getArguments().split(" ")))
                 .toArray(String[]::new);
 
-        byte[] expected = analysisService.getToolsResult(both);
+        byte[] expected = processHandler.getToolsResult(both);
 
         Path path = analysisService.writeToolResultToDir(HCG_TESTDIR, tool, "alma", expected);
         Assertions.assertTrue(path.toFile().exists());

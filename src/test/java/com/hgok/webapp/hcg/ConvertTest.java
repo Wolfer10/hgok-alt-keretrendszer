@@ -11,11 +11,13 @@ public class ConvertTest {
 
     @Test
     public void testJsonFileExits() throws IOException {
-        AnalysisService analysisService = new AnalysisService();
-        String dirName = "test NONE";
+
+        String dirName = "ACG-NONE";
+        String expectedFile = "TestFile2.json";
         Path path = Path.of(AnalysisService.WORKINGPATH, dirName);
-        analysisService.startHCGConvert(path);
-        Assertions.assertTrue(Path.of(AnalysisService.WORKINGPATH, dirName, "callgraph.json").toFile().exists());
+        new ProcessHandler().startHCGConvert(path);
+
+        Assertions.assertTrue(Path.of(AnalysisService.WORKINGPATH, dirName, expectedFile).toFile().exists());
     }
 
 
