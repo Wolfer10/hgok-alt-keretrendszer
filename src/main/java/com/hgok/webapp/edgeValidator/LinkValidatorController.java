@@ -75,11 +75,11 @@ public class LinkValidatorController {
      * a modelnek átadjuk az első linket
      */
     private void init(@PathVariable("id") Long id, Model model) {
-        //if(analysis == null || !analysisId.equals(id)){
-            //analysisId = id;
+        if(analysis == null || !analysisId.equals(id)){
+            analysisId = id;
             analysis = init_analysis(id);
             init_iterator();
-        //}
+        }
         model.addAttribute("currentLink", linkIterator.current());
         init_model(model);
     }
