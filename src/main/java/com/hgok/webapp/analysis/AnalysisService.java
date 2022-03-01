@@ -1,10 +1,13 @@
 package com.hgok.webapp.analysis;
 
 import com.hgok.webapp.compared.*;
+import com.hgok.webapp.hcg.ProcessHandler;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
+import com.hgok.webapp.util.ZipReader;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -22,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static com.hgok.webapp.util.FileHelper.removeDirByNames;
 
 
 @Service
@@ -54,12 +60,9 @@ public class AnalysisService {
         analysisRepository.save(analysis);
 
         FileHelper fileHelper = new FileHelper();
-
-        List<Path> filePaths = new ArrayList<>();
-
         fileHelper.saveFile(FileHelper.SOURCE_FOLDER, analysisFile);
 
-        filePaths.add(fileHelper.getFilePath());
+        List<Path> filePaths = fileHelper.getPaths();
 
         runEachToolsOnEachFiles(filteredTools, filePaths);
 
@@ -74,22 +77,21 @@ public class AnalysisService {
 
     }
 
+
+
     private void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths) throws IOException {
-        for (Tool filteredTool : filteredTools) {
+        removeDirByNames(WORKINGPATH, filteredTools);
+        for(Tool filteredTool : filteredTools) {
             for (Path filePath : filePaths) {
                 String[] tempTokens = new String[]{ filteredTool.getCompilerNameFromTool(), filteredTool.getPath(), };
                 String[] tokens = Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(filteredTool.getArguments(), filePath).split(" ")))
                         .toArray(String[]::new);
-
-                byte[] toolResult = getToolsResult(tokens);
-
+                byte[] toolResult = new ProcessHandler().getToolsResult(tokens);
                 Path toolResultDir = writeToolResultToDir(WORKINGPATH, filteredTool, filePath.getFileName().toString(), toolResult);
-                executeConversion(filteredTool.getName(), toolResultDir).completeExceptionally(new RuntimeException());
+                executeConversion(filteredTool.getName(), toolResultDir);
             }
         }
     }
-
-
 
     private List<Tool> filterTools(String[] toolNames) {
         List<Tool> filteredTools = new ArrayList<>();
@@ -103,7 +105,7 @@ public class AnalysisService {
     private CompletableFuture<Void> executeComparison() {
         return CompletableFuture.runAsync(() -> {
             try {
-                startHCGCompare(WORKINGPATH);
+                new ProcessHandler().startHCGCompare(WORKINGPATH);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -114,7 +116,7 @@ public class AnalysisService {
         return CompletableFuture.runAsync(() -> {
             try {
                 log.error(toolName + " kezdete");
-                startHCGConvert(dir);
+                new ProcessHandler().startHCGConvert(dir);
                 log.error(toolName + " vége");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -129,34 +131,4 @@ public class AnalysisService {
         return dir;
     }
 
-
-    public byte[] getToolsResult(String... tokens) throws IOException {
-
-        ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
-        Process rawAnalysis = toolProcessBuilder.start();
-        //System.err.println( new String(rawAnalysis.getErrorStream().readAllBytes()));
-        //System.out.println( new String(rawAnalysis.getInputStream().readAllBytes()));
-        return rawAnalysis.getInputStream().readAllBytes();
-    }
-
-
-    public void startHCGConvert(Path dir) throws IOException {
-        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "src/main/resources/hcg/jscg_convert2json.py", dir.toString());
-        Process convertProcess = convertProcessBuilder.start();
-        String convertResult = new String(convertProcess.getInputStream().readAllBytes());
-        String error = new String(convertProcess.getErrorStream().readAllBytes());
-//        System.err.println(error);
-//        System.out.println(convertResult);
-    }
-
-    public void startHCGCompare(String dir) throws IOException {
-        log.error("COMPARE CALLED");
-        ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "src/main/resources/hcg/jscg_compare_json.py", dir, "noentry", "nowrapper");
-        Process convertProcess = convertProcessBuilder.start();
-        String result = new String(convertProcess.getInputStream().readAllBytes());
-        String error = new String(convertProcess.getErrorStream().readAllBytes());
-        log.error("COMPARE ENDED");
-//        System.err.println(error);
-//        System.out.println(result);
-    }
 }
