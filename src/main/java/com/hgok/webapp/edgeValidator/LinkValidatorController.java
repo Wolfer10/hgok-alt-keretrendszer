@@ -44,9 +44,7 @@ public class LinkValidatorController {
 
     @PostMapping("/validate/end")
     public String end() {
-        for(ComparedAnalysis comparedAnalysis : analysis.getComparedAnalysises()) {
-            comparedAnalysis.setLinks(linkIterator.getList());
-        }
+        analysis.getComparedAnalysis().setLinks(linkIterator.getList());
         analysis.setStatus("validated");
         analysisRepository.save(analysis);
         return "redirect:/listAnalysis";
@@ -91,7 +89,7 @@ public class LinkValidatorController {
 
     private void init_iterator() {
         //System.out.println(analysis.getLinks());
-        linkIterator = new LinkIterator<>(analysis.getComparedAnalysises().stream().map(ComparedAnalysis::getLinks).flatMap(Collection::stream).collect(Collectors.toList()));
+        linkIterator = new LinkIterator<>(analysis.getComparedAnalysis().getLinks());
     }
 
     private Analysis init_analysis(@PathVariable("id") Long id) {

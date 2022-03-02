@@ -27,7 +27,7 @@ public class ComparedAnalysis {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne()
+    @OneToOne
     private Analysis analysis;
 
     private String fileName;

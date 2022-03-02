@@ -37,14 +37,7 @@ public class ComparedAnalysisServiceTest {
                 new MetricContainer(10,30,"körte"),
                 new MetricContainer(10,30,"barack"))));
 
-        assertThat(ListHelper.flatMap(analysis
-                .getComparedAnalysises()
-                .stream()
-                .map(ComparedAnalysis::getMetricContainers))).isNotEmpty().hasSize(3);
-
-        for (ComparedAnalysis comparedAnalysise : analysis.getComparedAnalysises()) {
-                assertThat(comparedAnalysise.getMetricContainers()).isNotNull();
-        }
+        assertThat(analysis.getComparedAnalysis().getMetricContainers()).isNotEmpty().hasSize(3);
     }
 
     @Test
@@ -60,7 +53,7 @@ public class ComparedAnalysisServiceTest {
         Analysis analysis = new Analysis();
         analysis.setTools(new ArrayList<>(List.of(new Tool("TestTool"))));
         comparedAnalysis.setLinks(new ArrayList<>());
-        analysis.setComparedAnalysises(List.of(comparedAnalysis));
+        analysis.setComparedAnalysis(comparedAnalysis);
         return analysis;
     }
 }

@@ -25,10 +25,10 @@
         <td th:text="${analysis.getStatus()}"> </td>
         <td><span th:each="tool : ${analysis.getTools()}" th:text="${tool.getName()} + ', '"> </span></td>
         <td>
-            <button th:if="${  !('validated'.equals(analysis.getStatus())) &&  analysis.getComparedAnalysises() != null  && analysis.getAllLinksFromCompareds().size() > 0 && analysis.getStatus().equals('kész')}">
-                <a th:href="@{/validate/{analysisId}/currlink/{id}(id=${analysis.getAllLinksFromCompareds().get(0).getId()},analysisId=${analysis.getId()})}">Validálás</a>
+            <button th:if="${  !('validated'.equals(analysis.getStatus())) &&  analysis.getComparedAnalysis() != null  && analysis.getComparedAnalysis().getLinks().size() > 0 && analysis.getStatus().equals('kész')}">
+                <a th:href="@{/validate/{analysisId}/currlink/{id}(id=${analysis.getComparedAnalysis().getId()},analysisId=${analysis.getId()})}">Validálás</a>
             </button>
-            <p th:if="${analysis.getComparedAnalysises() != null  && analysis.getAllLinksFromCompareds().size() == 0}">Nem találtunk éleket </p>
+            <p th:if="${analysis.getComparedAnalysis() != null  && analysis.getComparedAnalysis().getLinks().size() == 0}">Nem találtunk éleket </p>
             <button th:if="${'validated'.equals(analysis.getStatus())}">
                 <a th:href="@{/statistics/{analysisId}(analysisId=${analysis.getId()})}">Megtekintés</a>
             </button>
