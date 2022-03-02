@@ -34,3 +34,29 @@ build/
 
 ### hgok projekt ###
 /src/main/resources/static/working-dir
+
+src/test/java/com/hgok/webapp/utilTests/JANOS/
+
+*.zip
+
+src/test/java/com/hgok/webapp/utilTests/alma.txt
+
+src/test/java/com/hgok/webapp/utilTests/elem
+
+src/test/java/com/hgok/webapp/utilTests/tool-names.json
+
+src/test/java/com/hgok/webapp/util/tool-names.json
+
+src/test/java/com/hgok/webapp/util/destDir/TestFile3.js
+
+src/test/java/com/hgok/webapp/util/destDir/TestFile2.js
+
+*.cgtxt
+
+src/test/java/com/hgok/webapp/util/JANOS/
+
+src/test/java/com/hgok/webapp/util/elem
+
+src/test/java/com/hgok/webapp/util/Alma/
+
+*.txt
