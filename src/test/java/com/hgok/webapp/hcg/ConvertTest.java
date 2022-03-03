@@ -13,7 +13,7 @@ public class ConvertTest {
     public void testJsonFileExits() throws IOException {
 
         String dirName = "ACG-NONE";
-        String expectedFile = "TestFile3.json";
+        String expectedFile = dirName + ".json";
         Path path = Path.of(AnalysisService.WORKINGPATH, dirName);
         new ProcessHandler().startHCGConvert(path);
         Assertions.assertTrue(Path.of(AnalysisService.WORKINGPATH, dirName, expectedFile).toFile().exists());

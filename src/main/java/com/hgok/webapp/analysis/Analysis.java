@@ -57,7 +57,7 @@ public class Analysis {
 
 
     public Analysis updateAnalysis()  {
-        setComparedAnalysis(comparedAnalysis.initComparedAnalysis(
+        setComparedAnalysis(ComparedAnalysis.initComparedAnalysis(
                 Path.of(FileHelper.COMPARED_FOLDER,
                         id + ".json"), this));
         setStatus("kész");

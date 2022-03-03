@@ -72,7 +72,7 @@ public class ComparedAnalysis {
         metricContainers.clear();
     }
 
-    public ComparedAnalysis initComparedAnalysis(Path filePath, Analysis analysis) {
+    public static ComparedAnalysis initComparedAnalysis(Path filePath, Analysis analysis) {
         ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
         try {
             comparedAnalysis = JsonUtil.getComparedToolsFromJson(filePath.toString());

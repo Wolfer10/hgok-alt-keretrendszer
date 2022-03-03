@@ -7,7 +7,10 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 @Entity
@@ -53,5 +56,11 @@ public class Tool {
             compilerName = "node";
         }
         return compilerName;
+    }
+
+    public String[] generateTokensFromFilePath(Path filePath) {
+        String[] tempTokens = new String[]{ getCompilerNameFromTool(), getPath() };
+        return Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(getArguments(), filePath).split(" ")))
+                .toArray(String[]::new);
     }
 }

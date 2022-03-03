@@ -23,7 +23,7 @@ class ComparedAnalysisTest {
     @Test
     void initComparedAnalysis() {
         Analysis analysis = new Analysis();
-        ComparedAnalysis comparedAnalysis2 = comparedAnalysis.initComparedAnalysis(Path.of(TEST_JSON), analysis);
+        ComparedAnalysis comparedAnalysis2 = ComparedAnalysis.initComparedAnalysis(Path.of(TEST_JSON), analysis);
         assertThat(comparedAnalysis2.getAnalysis()).isEqualTo(analysis);
         assertThat(comparedAnalysis2.getLinks()).hasSize(1);
         assertThat(comparedAnalysis2.getLinks().get(0).getLabel()).isEqualTo(EXPECTED);
