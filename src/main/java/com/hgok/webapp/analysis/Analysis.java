@@ -1,7 +1,6 @@
 package com.hgok.webapp.analysis;
 
 import com.hgok.webapp.compared.ComparedAnalysis;
-import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.util.FileHelper;
 import lombok.AllArgsConstructor;
@@ -12,9 +11,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.nio.file.Path;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -53,15 +50,6 @@ public class Analysis {
 
     public Analysis(Long id) {
        this.id = id;
-    }
-
-
-    public Analysis updateAnalysis()  {
-        setComparedAnalysis(ComparedAnalysis.initComparedAnalysis(
-                Path.of(FileHelper.COMPARED_FOLDER,
-                        id + ".json"), this));
-        setStatus("kész");
-        return this;
     }
 
 }
