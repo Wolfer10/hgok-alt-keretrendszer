@@ -11,7 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ZipReaderTest {
 
     public static String UTIL_ZIP = "F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\util\\util.zip";
+    public static String EXAMPLE_ZIP = "F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\util\\example.zip";
     public static String DEST_FOLDER = "F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\util\\destDir";
+    public static String DEST_FOLDER2 = "F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\util\\destDir2";
 
     @Test
     public void testUnzip() throws IOException {
@@ -21,6 +23,16 @@ class ZipReaderTest {
         Path path3 = Path.of(DEST_FOLDER, "TestFile3.js");
         assertThat(path2).exists();
         assertThat(path3).exists();
+
+
+    }
+
+    @Test
+    public void testUnzipWithFolders() throws IOException {
+        ZipReader zipReader = new ZipReader();
+        zipReader.unzip(EXAMPLE_ZIP, DEST_FOLDER2);
+        Path path2 = Path.of(DEST_FOLDER2, "example-repo");
+        assertThat(path2).exists().isDirectory();
 
 
     }

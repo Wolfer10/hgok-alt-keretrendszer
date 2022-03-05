@@ -37,8 +37,8 @@ class AnalysisRepositoryTest {
     public void testFindById(){
         ComparedAnalysis comparedAnalysis = analysis.getComparedAnalysis();
         assertThat(comparedAnalysis).isNotNull();
-        assertThat(comparedAnalysis.getFileName()).isEqualTo("TestFile.json");
-        assertThat(comparedAnalysis.getToolMetrics()).hasSize(1);
+        assertThat(comparedAnalysis.getFileName()).isEqualTo(analysis.getId() + ".json");
+        assertThat(comparedAnalysis.getToolMetrics()).hasSize(2);
     }
 
     @Test

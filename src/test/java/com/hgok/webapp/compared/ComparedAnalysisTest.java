@@ -1,10 +1,14 @@
 package com.hgok.webapp.compared;
 
 import com.hgok.webapp.analysis.Analysis;
+import com.hgok.webapp.tool.Tool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -35,14 +39,47 @@ class ComparedAnalysisTest {
     }
 
     @Test
-    void getToolMetrics() {
+    public void updateMetrics(){
+
+        ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
+
+        Analysis analysis = initAnalysis(comparedAnalysis);
+        comparedAnalysis.setAnalysis(analysis);
+
+        comparedAnalysis.updateMetricContainers(10);
+
+        for (MetricContainer metricContainer : comparedAnalysis.getMetricContainers()) {
+            assertThat(metricContainer.getOurTruePositive()).isEqualTo(10);
+        }
     }
 
     @Test
-    void initMetricContainer() {
+    public void setMetrics(){
+        ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
+        Analysis analysis = initAnalysis(comparedAnalysis);
+        comparedAnalysis.setAnalysis(analysis);
+        comparedAnalysis.addAllMetricContainer(new ArrayList<>(List.of(
+                new MetricContainer(10,20,"alma"),
+                new MetricContainer(10,30,"körte"),
+                new MetricContainer(10,30,"barack"))));
+
+        assertThat(analysis.getComparedAnalysis().getMetricContainers()).isNotEmpty().hasSize(3);
     }
 
     @Test
-    void updateMetricContainers() {
+    public void testGetToolMetrics(){
+        ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
+        Analysis analysis = initAnalysis(comparedAnalysis);
+        comparedAnalysis.setAnalysis(analysis);
+        List<MetricContainer> metricContainer = comparedAnalysis.getToolMetrics();
+        assertThat(metricContainer).isNotEmpty().hasSize(1);
+    }
+
+    private Analysis initAnalysis(ComparedAnalysis comparedAnalysis) {
+        Analysis analysis = new Analysis();
+        analysis.setTools(new ArrayList<>(List.of(new Tool("TestTool"))));
+        comparedAnalysis.setLinks(new ArrayList<>());
+        analysis.setComparedAnalysis(comparedAnalysis);
+        return analysis;
     }
 }

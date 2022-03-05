@@ -1,6 +1,5 @@
 package com.hgok.webapp.util;
 
-import com.hgok.webapp.tool.Tool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,7 +98,7 @@ public class FileHelperTest {
     @Test
     void getPaths() throws IOException {
         fileHelper.setFilePath(Path.of(ZipReaderTest.UTIL_ZIP));
-        List<Path> paths = fileHelper.getPaths();
+        List<Path> paths = fileHelper.unzipAndGetFiles();
         assertThat(paths).isNotEmpty();
     }
 

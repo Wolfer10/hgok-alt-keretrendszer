@@ -1,0 +1,50 @@
+{
+  "directed": true,
+  "nodes": [
+    {
+      "id": 0,
+      "label": "<entry>",
+      "pos": "<entry>",
+      "entry": true,
+      "final": true
+    },
+    {
+      "id": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@10",
+      "pos": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js:10:1",
+      "entry": false,
+      "final": false
+    },
+    {
+      "id": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@5",
+      "pos": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js:5:1",
+      "entry": false,
+      "final": false
+    },
+    {
+      "id": 3,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@1",
+      "pos": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js:1:1",
+      "entry": false,
+      "final": true
+    }
+  ],
+  "links": [
+    {
+      "target": 2,
+      "source": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@10 -> F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@5"
+    },
+    {
+      "target": 3,
+      "source": 1,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@10 -> F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@1"
+    },
+    {
+      "target": 3,
+      "source": 2,
+      "label": "F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@5 -> F:/Feri/egyetem/szakdoga/hgok-alt-keretrendszer/src/test/java/com/hgok/webapp/util/TestFile.js@1"
+    }
+  ]
+}
