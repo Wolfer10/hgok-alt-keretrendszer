@@ -1,22 +1,17 @@
 package com.hgok.webapp.analysis;
 
-import com.hgok.webapp.compared.*;
+import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.hcg.ProcessHandler;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
-import com.hgok.webapp.util.ZipReader;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityNotFoundException;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -24,11 +19,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static com.hgok.webapp.util.FileHelper.removeDirByNames;
-
 
 @Service
 public class AnalysisService {
@@ -60,11 +51,14 @@ public class AnalysisService {
         analysisRepository.save(analysis);
 
         FileHelper fileHelper = new FileHelper();
-        fileHelper.saveFile(FileHelper.SOURCE_FOLDER, analysisFile);
 
-        List<Path> filePaths = fileHelper.getPaths();
+        fileHelper.removeDirByName(FileHelper.SOURCE_FOLDER, "sourceFiles");
+        fileHelper.createDirectoryFromName(FileHelper.SOURCE_FOLDER, "sourceFiles");
+        fileHelper.saveMultipartFile(FileHelper.SOURCE_FOLDER, analysisFile);
 
-        runEachToolsOnEachFiles(filteredTools, filePaths);
+        List<Path> filePaths = fileHelper.unzipAndGetFiles();
+
+        runEachToolsOnEachFiles(filteredTools, filePaths, analysis.getId());
 
         JsonUtil.dumpToolNamesIntoJson(filteredTools, WORKINGPATH);
 
@@ -72,26 +66,30 @@ public class AnalysisService {
         analysis.setFileNames(filePaths.stream().map(filePath -> filePath.getFileName().toString()).collect(Collectors.toList()));
 
         executeComparison()
-                .thenRun(() -> analysisRepository.save(analysis.updateAnalysis()))
-                .exceptionally((ex) -> {ex.printStackTrace(System.err); return null;}).get();
-
+                .thenRun(() -> {
+                    analysis.setComparedAnalysis(ComparedAnalysis.initComparedAnalysis(
+                            Path.of(FileHelper.COMPARED_FOLDER,
+                                    analysis.getId() + ".json"), analysis));
+                    analysis.setStatus("kész");
+                    analysisRepository.save(analysis);
+                })
+                .exceptionally((ex) -> {
+                    ex.printStackTrace(System.err);
+                    return null;
+                }).get();
     }
 
-
-
-    private void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths) throws IOException {
-        removeDirByNames(WORKINGPATH, filteredTools);
+    public void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths, long analId) throws IOException {
+        FileHelper fileHelper = new FileHelper();
         for(Tool filteredTool : filteredTools) {
-            for (Path filePath : filePaths) {
-                String[] tempTokens = new String[]{ filteredTool.getCompilerNameFromTool(), filteredTool.getPath(), };
-                String[] tokens = Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(filteredTool.getArguments(), filePath).split(" ")))
-                        .toArray(String[]::new);
-                byte[] toolResult = new ProcessHandler().getToolsResult(tokens);
-                Path toolResultDir = writeToolResultToDir(WORKINGPATH, filteredTool, filePath.getFileName().toString(), toolResult);
-                executeConversion(filteredTool.getName(), toolResultDir);
-            }
+            new FileHelper().removeDirByName(WORKINGPATH, filteredTool.getName());
+            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analId));
+            fileHelper.appendToFile(pathOfResult, filteredTool.getToolResult(filePaths).getResult());
+            executeConversion(filteredTool.getName(), pathOfResult.getParent());
         }
     }
+
+
 
     private List<Tool> filterTools(String[] toolNames) {
         List<Tool> filteredTools = new ArrayList<>();
@@ -112,7 +110,7 @@ public class AnalysisService {
         }, Exocutor.executor );
     }
 
-    public CompletableFuture<?> executeConversion(String toolName, Path dir) {
+    private CompletableFuture<?> executeConversion(String toolName, Path dir) {
         return CompletableFuture.runAsync(() -> {
             try {
                 log.error(toolName + " kezdete");
@@ -123,12 +121,4 @@ public class AnalysisService {
             }
         }, Exocutor.executor );
     }
-
-    public Path writeToolResultToDir(String path, Tool tool, String fileName, byte[] result) throws IOException {
-        FileHelper fileHelper = new FileHelper();
-        Path dir = fileHelper.createDirectoryFromName(path, tool.getName());
-        fileHelper.writeBytesIntoNewDir(path, tool.getName() + "/" + fileName.split("\\.")[0] + ".cgtxt", result);
-        return dir;
-    }
-
 }

@@ -1,8 +1,7 @@
 package com.hgok.webapp.util;
 
-import com.hgok.webapp.tool.Tool;
-import com.hgok.webapp.util.FileHelper;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,17 +20,21 @@ public class FileHelperTest {
     public static final String TESTDIR = "src/test/java/com/hgok/webapp/util/";
     public final String WORKINGPATH = "src/main/resources/static/working-dir/";
 
+    FileHelper fileHelper;
+    @BeforeEach
+    public void init(){
+        fileHelper = new FileHelper();
+    }
 
     @Test
     public void testCreateDir() throws IOException {
-        FileHelper fileHelper = new FileHelper();
+
         Path path = fileHelper.createDirectoryFromName(TESTDIR, "Alma");
         Assertions.assertTrue(path.toFile().exists());
     }
 
     @Test
     public void testCreateDirIfExits() throws IOException {
-        FileHelper fileHelper = new FileHelper();
         Files.createDirectories(Path.of(TESTDIR, "Alma"));
         Path path = fileHelper.createDirectoryFromName(TESTDIR, "Alma");
         Assertions.assertTrue(path.toFile().exists());
@@ -40,15 +42,14 @@ public class FileHelperTest {
 
     @Test
     public void testWriteResultToNewFile() throws IOException {
-        FileHelper fileHelper = new FileHelper();
         String expected = "alma";
-        Path path = fileHelper.writeBytesIntoNewDir(TESTDIR, "elem", expected.getBytes());
+        Path path = fileHelper.writeBytesIntoNewDir(TESTDIR, "korte", expected.getBytes());
         Assertions.assertTrue(path.toFile().exists());
         AssertFromFile(path, expected);
+        fileHelper.deleteFileIfExits(path);
     }
     @Test
     public void testWriteResultToNewDirAndFileExits() throws IOException {
-        FileHelper fileHelper = new FileHelper();
         String expected = "alma";
         Path path1 = fileHelper.createDirectoryFromName(TESTDIR, "JANOS");
         Path path2 = fileHelper.writeBytesIntoNewDir(TESTDIR, "JANOS/elem2", expected.getBytes());
@@ -65,14 +66,12 @@ public class FileHelperTest {
 
     @Test
     public void testWriteNewFileEveryTime() throws IOException {
-
         Assertions.assertTrue(Paths.get(TESTDIR).toFile().isDirectory());
         Assertions.assertTrue(Paths.get(TESTDIR).toFile().exists());
 
         if(Paths.get(TESTDIR + "alma.txt").toFile().exists()){
             Files.delete(Paths.get(TESTDIR + "alma.txt"));
         }
-
         Assertions.assertFalse(Paths.get(TESTDIR + "alma.txt").toFile().exists());
 
         Files.write(Paths.get(TESTDIR + "alma.txt"), "alma".getBytes());
@@ -98,15 +97,13 @@ public class FileHelperTest {
 
     @Test
     void getPaths() throws IOException {
-        FileHelper fileHelper = new FileHelper();
         fileHelper.setFilePath(Path.of(ZipReaderTest.UTIL_ZIP));
-        List<Path> paths = fileHelper.getPaths();
+        List<Path> paths = fileHelper.unzipAndGetFiles();
         assertThat(paths).isNotEmpty();
     }
 
     @Test
     void getFilesFromDir() throws IOException {
-        FileHelper fileHelper = new FileHelper();
         fileHelper.setFilePath(Path.of(ZipReaderTest.UTIL_ZIP));
         List<Path> paths = fileHelper.getFilesFromDir(new File(ZipReaderTest.DEST_FOLDER));
         assertThat(paths).isNotEmpty();
@@ -117,11 +114,44 @@ public class FileHelperTest {
 
     @Test
     void removeByName() throws IOException {
-        FileHelper fileHelper = new FileHelper();
         Path path = fileHelper.createDirectoryFromName(TESTDIR, "Alma");
-        FileHelper.removeDirByNames(TESTDIR, new ArrayList<>(List.of(new Tool("Alma"))));
+        new FileHelper().removeDirByName(TESTDIR, "Alma");
         assertThat(path).doesNotExist();
     }
 
+    @Test
+    void testFileAppend() throws IOException {
+        Path filePath = Path.of(TESTDIR, "elem2");
+        Files.createFile(filePath);
+        fileHelper.appendToFile(filePath, "string\n".getBytes());
+        fileHelper.appendToFile(filePath, "string\n".getBytes());
+        assertThat(Files.readAllLines(filePath)).hasSize(2);
+        fileHelper.deleteFileIfExits(filePath);
+    }
+
+    @Test
+    void test() throws IOException {
+        Path filePath = Path.of(TESTDIR, "elem3");
+        Files.createFile(filePath);
+        fileHelper.appendToFile(filePath, "string\n".getBytes());
+        fileHelper.appendToFile(filePath, "string\n".getBytes());
+        assertThat(Files.readAllLines(filePath)).hasSize(2);
+        fileHelper.deleteFileIfExits(filePath);
+    }
+
+
+    @Test
+    void createFileOrGetPath() throws IOException {
+        Path path = fileHelper.createDirAndInsertFile( Path.of(TESTDIR),"elem");
+        assertThat(path).exists().isEmptyFile().hasFileName("elem.cgtxt");
+        //FileHelper.removeDirByNames(String.valueOf(Path.of(TESTDIR)), List.of(new Tool("elem")));
+        Path path2 = fileHelper.createDirAndInsertFile(Path.of(TESTDIR),"elem");
+        assertThat(path2).exists().isEmptyFile();
+    }
+
+    @Test
+    void testGetParent(){
+        assertThat(Path.of(TESTDIR, "alma.txt").getParent()).isDirectory().hasFileName("util");
+    }
 
 }

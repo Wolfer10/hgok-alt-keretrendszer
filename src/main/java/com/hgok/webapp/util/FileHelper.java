@@ -1,25 +1,19 @@
 package com.hgok.webapp.util;
 
-import com.hgok.webapp.tool.Tool;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.hgok.webapp.analysis.AnalysisService.WORKINGPATH;
 
 @Getter
 @Setter
@@ -50,7 +44,7 @@ public class FileHelper {
         }
     }
 
-    public void saveFile(String folder, MultipartFile multipartFile) throws IOException {
+    public void saveMultipartFile(String folder, MultipartFile multipartFile) throws IOException {
         Path path =  Paths.get(folder, File.separator , multipartFile.getOriginalFilename());
         Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
         filePath = path;
@@ -60,7 +54,7 @@ public class FileHelper {
         return filename.split("\\.")[0] + newFormat;
     }
 
-    public List<Path> getPaths() throws IOException {
+    public List<Path> unzipAndGetFiles() throws IOException {
         List<Path> filePaths = new ArrayList<>();
         if ("zip".equals(getFilePath().getFileName().toString().split("\\.")[1])){
             ZipReader zipReader = new ZipReader();
@@ -82,11 +76,32 @@ public class FileHelper {
                 .collect(Collectors.toList());
         return filePaths;
     }
-    public static void removeDirByNames(String path, List<Tool> filteredTools) throws IOException {
-        for(Tool filteredTool : filteredTools) {
-            FileHelper fileHelper = new FileHelper();
-            fileHelper.deleteFileIfExits(Path.of(path, filteredTool.getName()));
+
+    public void removeDirByName(String path, String name) throws IOException {
+        deleteFileIfExits(Path.of(path, name));
+    }
+
+    public void appendToFile(Path filePath, byte[] toolResult) throws IOException {
+        try (FileWriter fileWriter = new FileWriter(String.valueOf(filePath), true)){
+            fileWriter.write(new String(toolResult));
         }
     }
+
+    public Path createDirAndInsertFile(Path path, String fileName) throws IOException {
+        return getPath(path, fileName, fileName, ".cgtxt");
+    }
+
+    public Path createDirAndInsertFile(Path path, String dirName, String fileName) throws IOException {
+        return getPath(path, dirName, fileName, ".cgtxt");
+    }
+
+    private Path getPath(Path path, String dirName, String fileName, String ext) throws IOException {
+        Path dir = createDirectoryFromName(String.valueOf(path), dirName);
+        if(new File(String.valueOf(Path.of(String.valueOf(dir), fileName + ext))).exists()){
+            return Path.of(String.valueOf(dir), fileName + ext);
+        }
+        return Files.createFile(Path.of(String.valueOf(dir), fileName + ext));
+    }
+
 
 }

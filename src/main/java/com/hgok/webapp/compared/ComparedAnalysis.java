@@ -27,7 +27,7 @@ public class ComparedAnalysis {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne()
+    @OneToOne
     private Analysis analysis;
 
     private String fileName;
@@ -72,7 +72,7 @@ public class ComparedAnalysis {
         metricContainers.clear();
     }
 
-    public ComparedAnalysis initComparedAnalysis(Path filePath, Analysis analysis) {
+    public static ComparedAnalysis initComparedAnalysis(Path filePath, Analysis analysis) {
         ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
         try {
             comparedAnalysis = JsonUtil.getComparedToolsFromJson(filePath.toString());

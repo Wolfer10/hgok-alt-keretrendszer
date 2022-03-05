@@ -4,10 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 @Entity
@@ -53,5 +59,21 @@ public class Tool {
             compilerName = "node";
         }
         return compilerName;
+    }
+
+    public String[] generateTokensFromFilePath(Path filePath) {
+        String[] tempTokens = new String[]{ getCompilerNameFromTool(), getPath() };
+        return Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(getArguments(), filePath).split(" ")))
+                .toArray(String[]::new);
+    }
+
+    public String[] generateTokensFromFilePaths(List<Path> filePaths) {
+        String[] tempTokens = new String[]{ getCompilerNameFromTool(), getPath() };
+        return Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(getArguments(), StringUtils.join(filePaths, " ")).split(" ")))
+                .toArray(String[]::new);
+    }
+    public ToolResult getToolResult(List<Path> filePath) throws IOException {
+        String[] tokens = generateTokensFromFilePaths(filePath);
+        return new ToolResult(tokens);
     }
 }

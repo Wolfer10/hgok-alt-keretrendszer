@@ -29,15 +29,16 @@ public class Link {
     private Long source;
     @SerializedName("label")
     @Expose
+    @Lob
     private String label;
     @SerializedName("foundBy")
     @Expose
     @ElementCollection
     private List<String> foundBy = null;
 
-    @Column(columnDefinition="text")
+    @Lob
     private String targetSnippet;
-    @Column(columnDefinition="text")
+    @Lob
     private String sourceSnippet;
 
     @Enumerated(value = EnumType.STRING)

@@ -27,8 +27,8 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void test() throws IOException {
-        ComparedAnalysis comparedTools = JsonUtil.getComparedToolsFromJson("src/main/resources/static/working-dir/x-compared/callgraph.json");
+    public void testGetComparedToolsFromJson() throws IOException {
+        ComparedAnalysis comparedTools = JsonUtil.getComparedToolsFromJson("F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\utilTests\\call-graph.json");
         Assertions.assertNotNull(comparedTools);
         Assertions.assertTrue(comparedTools.getLinks().size() > 0);
         System.out.println(comparedTools.getLinks());

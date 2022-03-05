@@ -12,13 +12,5 @@ import java.util.stream.StreamSupport;
 @Service
 public class ComparedAnalysisService {
 
-    @Autowired
-    ComparedAnalysisRepository comparedAnalysisRepository;
-
-    public List<ComparedAnalysis> getMetricContainers(ComparedAnalysis comparedAnalysis){
-       return StreamSupport
-                .stream(comparedAnalysisRepository.findAll().spliterator(), false)
-                .collect(Collectors.toList());
-    }
 
 }

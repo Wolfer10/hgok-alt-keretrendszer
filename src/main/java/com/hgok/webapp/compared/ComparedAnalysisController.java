@@ -24,18 +24,14 @@ public class ComparedAnalysisController {
     @GetMapping("/statistics/{analysisId}")
     public String showStats(@PathVariable("analysisId") Long id, Model model) {
         initAnalysis(id);
-        model.addAttribute("compareds", actualAnalysis.getComparedAnalysises());
+        model.addAttribute("compared", actualAnalysis.getComparedAnalysis());
         analysisRepository.save(actualAnalysis);
         return "validated-analysis";
     }
 
     @PostMapping("/calculateStats")
     public String calculateStats(@RequestParam(value = "ourPositive") int ourPositive, @RequestParam(value = "id") long id){
-        actualAnalysis.getComparedAnalysises()
-                .stream()
-                .filter(comparedAnalysis -> comparedAnalysis.getId() == id)
-                .forEach(comparedAnalysis -> comparedAnalysis.updateMetricContainers(ourPositive));
-
+        actualAnalysis.getComparedAnalysis().updateMetricContainers(ourPositive);
         return "redirect:/statistics/" + actualAnalysis.getId();
     }
 
@@ -44,10 +40,8 @@ public class ComparedAnalysisController {
             analysisId = id;
             actualAnalysis = analysisRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
-            for (ComparedAnalysis comparedAnalysise : actualAnalysis.getComparedAnalysises()) {
-                comparedAnalysise.clerMetricContainers();
-                comparedAnalysise.getToolMetrics();
-            }
+            actualAnalysis.getComparedAnalysis().clerMetricContainers();
+            actualAnalysis.getComparedAnalysis().getToolMetrics();
         }
     }
 
