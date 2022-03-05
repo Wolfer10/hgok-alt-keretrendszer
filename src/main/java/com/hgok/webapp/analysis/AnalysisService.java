@@ -1,9 +1,9 @@
 package com.hgok.webapp.analysis;
 
+import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.hcg.ProcessHandler;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
-import com.hgok.webapp.tool.ToolResult;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class AnalysisService {
         fileHelper.createDirectoryFromName(FileHelper.SOURCE_FOLDER, "sourceFiles");
         fileHelper.saveMultipartFile(FileHelper.SOURCE_FOLDER, analysisFile);
 
-        List<Path> filePaths = fileHelper.getPaths();
+        List<Path> filePaths = fileHelper.unzipAndGetFiles();
 
         runEachToolsOnEachFiles(filteredTools, filePaths, analysis.getId());
 
@@ -66,30 +66,30 @@ public class AnalysisService {
         analysis.setFileNames(filePaths.stream().map(filePath -> filePath.getFileName().toString()).collect(Collectors.toList()));
 
         executeComparison()
-                .thenRun(() -> analysisRepository.save(analysis.updateAnalysis()))
-                .exceptionally((ex) -> {ex.printStackTrace(System.err); return null;}).get();
-
+                .thenRun(() -> {
+                    analysis.setComparedAnalysis(ComparedAnalysis.initComparedAnalysis(
+                            Path.of(FileHelper.COMPARED_FOLDER,
+                                    analysis.getId() + ".json"), analysis));
+                    analysis.setStatus("kész");
+                    analysisRepository.save(analysis);
+                })
+                .exceptionally((ex) -> {
+                    ex.printStackTrace(System.err);
+                    return null;
+                }).get();
     }
-
-
 
     public void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths, long analId) throws IOException {
         FileHelper fileHelper = new FileHelper();
         for(Tool filteredTool : filteredTools) {
-            fileHelper.removeDirByName(WORKINGPATH, filteredTool.getName());
-            runToolsOnPaths(filePaths, fileHelper, filteredTool, String.valueOf(analId) );
-        }
-    }
-
-    private void runToolsOnPaths(List<Path> filePaths, FileHelper fileHelper, Tool filteredTool, String fileName) throws IOException {
-        for (Path filePath : filePaths) {
-            String[] tokens = filteredTool.generateTokensFromFilePath(filePath);
-            ToolResult result = new ToolResult(tokens);
-            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), fileName);
-            result.appendResultToFile(pathOfResult);
+            new FileHelper().removeDirByName(WORKINGPATH, filteredTool.getName());
+            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analId));
+            fileHelper.appendToFile(pathOfResult, filteredTool.getToolResult(filePaths).getResult());
             executeConversion(filteredTool.getName(), pathOfResult.getParent());
         }
     }
+
+
 
     private List<Tool> filterTools(String[] toolNames) {
         List<Tool> filteredTools = new ArrayList<>();
