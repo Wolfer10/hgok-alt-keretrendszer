@@ -23,7 +23,7 @@ public class JsonUtil {
         FileHelper fileHelper = new FileHelper();
         Map<String, String> nameMap = tools.stream().collect(Collectors.toMap(Tool::getName, Tool::getName));
         String toolNameJson = mapToJson(nameMap);
-        fileHelper.writeBytesIntoNewDir(fullpath, "/tool-names.json", toolNameJson.getBytes());
+        fileHelper.writeBytesIntoNewFile(fullpath, "/tool-names.json", toolNameJson.getBytes());
     }
 
     /**

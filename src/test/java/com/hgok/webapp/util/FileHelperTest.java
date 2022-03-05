@@ -43,7 +43,7 @@ public class FileHelperTest {
     @Test
     public void testWriteResultToNewFile() throws IOException {
         String expected = "alma";
-        Path path = fileHelper.writeBytesIntoNewDir(TESTDIR, "korte", expected.getBytes());
+        Path path = fileHelper.writeBytesIntoNewFile(TESTDIR, "korte", expected.getBytes());
         Assertions.assertTrue(path.toFile().exists());
         AssertFromFile(path, expected);
         fileHelper.deleteFileIfExits(path);
@@ -52,7 +52,7 @@ public class FileHelperTest {
     public void testWriteResultToNewDirAndFileExits() throws IOException {
         String expected = "alma";
         Path path1 = fileHelper.createDirectoryFromName(TESTDIR, "JANOS");
-        Path path2 = fileHelper.writeBytesIntoNewDir(TESTDIR, "JANOS/elem2", expected.getBytes());
+        Path path2 = fileHelper.writeBytesIntoNewFile(TESTDIR, "JANOS/elem2", expected.getBytes());
         Assertions.assertTrue(path1.toFile().exists());
         Assertions.assertTrue(path2.toFile().exists());
         AssertFromFile(path2, expected);
@@ -98,12 +98,12 @@ public class FileHelperTest {
     @Test
     void getPaths() throws IOException {
         fileHelper.setFilePath(Path.of(ZipReaderTest.UTIL_ZIP));
-        List<Path> paths = fileHelper.unzipAndGetFiles();
+        List<Path> paths = fileHelper.getFilePaths();
         assertThat(paths).isNotEmpty();
     }
 
     @Test
-    void getFilesFromDir() throws IOException {
+    void getFilesFromDir() {
         fileHelper.setFilePath(Path.of(ZipReaderTest.UTIL_ZIP));
         List<Path> paths = fileHelper.getFilesFromDir(new File(ZipReaderTest.DEST_FOLDER));
         assertThat(paths).isNotEmpty();

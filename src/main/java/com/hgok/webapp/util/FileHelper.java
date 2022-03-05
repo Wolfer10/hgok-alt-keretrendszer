@@ -31,8 +31,8 @@ public class FileHelper {
         return fullPath;
     }
 
-    public Path writeBytesIntoNewDir(String path, String fileName, byte[] result) throws IOException {
-        Path fullPath = Paths.get(path + fileName);
+    public Path writeBytesIntoNewFile(String path, String fileName, byte[] result) throws IOException {
+        Path fullPath = Path.of(path , fileName);
         return Files.write(fullPath, result);
     }
 
@@ -44,26 +44,22 @@ public class FileHelper {
         }
     }
 
-    public void saveMultipartFile(String folder, MultipartFile multipartFile) throws IOException {
-        Path path =  Paths.get(folder, File.separator , multipartFile.getOriginalFilename());
-        Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        filePath = path;
-    }
-
-    public String replaceFormat(String filename, String newFormat){
-        return filename.split("\\.")[0] + newFormat;
-    }
-
-    public List<Path> unzipAndGetFiles() throws IOException {
+    public List<Path> getFilePaths() throws IOException {
         List<Path> filePaths = new ArrayList<>();
-        if ("zip".equals(getFilePath().getFileName().toString().split("\\.")[1])){
-            ZipReader zipReader = new ZipReader();
-            zipReader.unzip(getFilePath().toString(), FileHelper.SOURCE_FOLDER);
-            File dir = new File(FileHelper.SOURCE_FOLDER);
-            filePaths = getFilesFromDir(dir);
+        if ("zip".equals(filePath.getFileName().toString().split("\\.")[1])){
+            filePaths = getFilePathsFromZip();
         } else {
-            filePaths.add(getFilePath());
+            filePaths.add(filePath);
         }
+        return filePaths;
+    }
+
+    private List<Path> getFilePathsFromZip() throws IOException {
+        List<Path> filePaths;
+        ZipReader zipReader = new ZipReader();
+        zipReader.unzip(getFilePath().toString(), FileHelper.SOURCE_FOLDER);
+        File dir = new File(FileHelper.SOURCE_FOLDER);
+        filePaths = getFilesFromDir(dir);
         return filePaths;
     }
 

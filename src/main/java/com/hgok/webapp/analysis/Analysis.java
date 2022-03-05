@@ -1,6 +1,7 @@
 package com.hgok.webapp.analysis;
 
 import com.hgok.webapp.compared.ComparedAnalysis;
+import com.hgok.webapp.hcg.ProcessHandler;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolResult;
 import com.hgok.webapp.util.FileHelper;
@@ -10,9 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.List;
+
+import static com.hgok.webapp.analysis.AnalysisService.WORKINGPATH;
 
 @Getter
 @Setter
@@ -25,8 +30,7 @@ public class Analysis {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany(
-            cascade = CascadeType.ALL)
+    @ManyToMany()
     private List<Tool> tools;
 
     @ElementCollection
