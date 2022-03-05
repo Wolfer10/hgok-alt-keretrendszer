@@ -1,6 +1,7 @@
 package com.hgok.webapp.analysis;
 
 import com.hgok.webapp.compared.ComparedAnalysis;
+import com.hgok.webapp.hcg.ProcessHandler;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.util.FileHelper;
 import lombok.AllArgsConstructor;
@@ -9,9 +10,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.List;
+
+import static com.hgok.webapp.analysis.AnalysisService.WORKINGPATH;
 
 @Getter
 @Setter
@@ -24,8 +29,7 @@ public class Analysis {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany(
-            cascade = CascadeType.ALL)
+    @ManyToMany()
     private List<Tool> tools;
 
     @ElementCollection
@@ -50,6 +54,17 @@ public class Analysis {
 
     public Analysis(Long id) {
        this.id = id;
+    }
+
+    public void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths) throws IOException {
+        FileHelper fileHelper = new FileHelper();
+        for(Tool filteredTool : filteredTools) {
+            new FileHelper().removeDirByName(WORKINGPATH, filteredTool.getName());
+            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(id));
+            fileHelper.appendToFile(pathOfResult, filteredTool.getToolResult(filePaths).getResult());
+            ProcessHandler processHandler = new ProcessHandler();
+            processHandler.startHCGConvert(pathOfResult.getParent());
+        }
     }
 
 }

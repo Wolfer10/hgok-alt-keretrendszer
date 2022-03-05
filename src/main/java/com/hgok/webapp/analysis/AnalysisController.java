@@ -4,6 +4,7 @@ package com.hgok.webapp.analysis;
 import com.hgok.webapp.compared.LinkState;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.tool.ToolRepository;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -47,7 +49,8 @@ public class AnalysisController {
     }
     @PostMapping("/startAnalysis")
     String startAnalysis(@RequestParam(value = "name") String[] names, @RequestParam(value = "file") MultipartFile analysisFile) throws IOException, InterruptedException, ExecutionException {
-        analysisService.startAnalysis(names, analysisFile);
+       analysisService.startAnalysis(names, IOUtils.toByteArray((analysisFile.getInputStream())), analysisFile.getOriginalFilename());
+
         return "redirect:/listAnalysis";
     }
 

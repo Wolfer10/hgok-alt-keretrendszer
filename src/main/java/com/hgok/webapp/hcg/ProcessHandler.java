@@ -1,5 +1,7 @@
 package com.hgok.webapp.hcg;
 
+import org.springframework.scheduling.annotation.Async;
+
 import java.io.IOException;
 import java.nio.file.Path;
 

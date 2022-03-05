@@ -9,14 +9,13 @@ import com.hgok.webapp.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -41,55 +40,45 @@ public class AnalysisService {
                 .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
     }
 
-
-    public void startAnalysis(String[] toolNames, MultipartFile analysisFile) throws IOException, ExecutionException, InterruptedException {
+    @Async("asyncExecutor")
+    public void startAnalysis(String[] toolNames, byte[] file, String originFileName) throws IOException, ExecutionException, InterruptedException {
 
         List<Tool> filteredTools = filterTools(toolNames);
 
         Analysis analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()));
-
         analysisRepository.save(analysis);
 
-        FileHelper fileHelper = new FileHelper();
+        List<Path> filePaths = saveFileIntoSourceFolder(file, originFileName);
 
-        fileHelper.removeDirByName(FileHelper.SOURCE_FOLDER, "sourceFiles");
-        fileHelper.createDirectoryFromName(FileHelper.SOURCE_FOLDER, "sourceFiles");
-        fileHelper.saveMultipartFile(FileHelper.SOURCE_FOLDER, analysisFile);
-
-        List<Path> filePaths = fileHelper.unzipAndGetFiles();
-
-        runEachToolsOnEachFiles(filteredTools, filePaths, analysis.getId());
+        analysis.runEachToolsOnEachFiles(filteredTools, filePaths);
 
         JsonUtil.dumpToolNamesIntoJson(filteredTools, WORKINGPATH);
 
-
         analysis.setFileNames(filePaths.stream().map(filePath -> filePath.getFileName().toString()).collect(Collectors.toList()));
 
-        executeComparison()
-                .thenRun(() -> {
-                    analysis.setComparedAnalysis(ComparedAnalysis.initComparedAnalysis(
-                            Path.of(FileHelper.COMPARED_FOLDER,
-                                    analysis.getId() + ".json"), analysis));
-                    analysis.setStatus("kész");
-                    analysisRepository.save(analysis);
-                })
-                .exceptionally((ex) -> {
-                    ex.printStackTrace(System.err);
-                    return null;
-                }).get();
+        ProcessHandler processHandler = new ProcessHandler();
+        processHandler.startHCGCompare(WORKINGPATH);
+
+        analysis.setComparedAnalysis(
+                ComparedAnalysis.initComparedAnalysis(
+                        Path.of(FileHelper.COMPARED_FOLDER, analysis.getId() + ".json"),
+                        analysis));
+        analysis.setStatus("kész");
+
+        analysisRepository.save(analysis);
     }
 
-    public void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths, long analId) throws IOException {
+    private List<Path> saveFileIntoSourceFolder(byte[] file, String fileName) throws IOException {
         FileHelper fileHelper = new FileHelper();
-        for(Tool filteredTool : filteredTools) {
-            new FileHelper().removeDirByName(WORKINGPATH, filteredTool.getName());
-            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analId));
-            fileHelper.appendToFile(pathOfResult, filteredTool.getToolResult(filePaths).getResult());
-            executeConversion(filteredTool.getName(), pathOfResult.getParent());
-        }
+        resetSourceFilesFolder(fileHelper);
+        fileHelper.setFilePath(fileHelper.writeBytesIntoNewFile(FileHelper.SOURCE_FOLDER, fileName, file));
+        return fileHelper.getFilePaths();
     }
 
-
+    private void resetSourceFilesFolder(FileHelper fileHelper) throws IOException {
+        fileHelper.removeDirByName(FileHelper.SOURCE_FOLDER, "sourceFiles");
+        fileHelper.createDirectoryFromName(FileHelper.SOURCE_FOLDER, "sourceFiles");
+    }
 
     private List<Tool> filterTools(String[] toolNames) {
         List<Tool> filteredTools = new ArrayList<>();
@@ -100,25 +89,4 @@ public class AnalysisService {
         return filteredTools;
     }
 
-    private CompletableFuture<Void> executeComparison() {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                new ProcessHandler().startHCGCompare(WORKINGPATH);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }, Exocutor.executor );
-    }
-
-    private CompletableFuture<?> executeConversion(String toolName, Path dir) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                log.error(toolName + " kezdete");
-                new ProcessHandler().startHCGConvert(dir);
-                log.error(toolName + " vége");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }, Exocutor.executor );
-    }
 }
