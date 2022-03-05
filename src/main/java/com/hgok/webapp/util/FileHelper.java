@@ -1,6 +1,5 @@
 package com.hgok.webapp.util;
 
-import com.hgok.webapp.tool.Tool;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
@@ -55,7 +54,7 @@ public class FileHelper {
         return filename.split("\\.")[0] + newFormat;
     }
 
-    public List<Path> getPaths() throws IOException {
+    public List<Path> unzipAndGetFiles() throws IOException {
         List<Path> filePaths = new ArrayList<>();
         if ("zip".equals(getFilePath().getFileName().toString().split("\\.")[1])){
             ZipReader zipReader = new ZipReader();
