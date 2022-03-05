@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -72,8 +74,5 @@ public class Tool {
         return Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(getArguments(), StringUtils.join(filePaths, " ")).split(" ")))
                 .toArray(String[]::new);
     }
-    public ToolResult getToolResult(List<Path> filePath) throws IOException {
-        String[] tokens = generateTokensFromFilePaths(filePath);
-        return new ToolResult(tokens);
-    }
+
 }

@@ -99,15 +99,15 @@ public class ComparedAnalysis {
 
     public List<MetricContainer> getToolMetrics(){
         for (Tool tool : getAnalysis().getTools()) {
-            metricContainers.add(initMetricContainer( tool.getName()));
+            metricContainers.add(initMetricContainer(tool));
         }
         return metricContainers;
     }
 
-    public MetricContainer initMetricContainer(String toolName) {
-        List<Link> acceptedLinks = getLinks().stream().filter(link -> link.getState() == LinkState.ACCEPTED && new HashSet<>(link.getFoundBy()).contains(toolName)).collect(Collectors.toList());
-        int all = getLinks().stream().filter(link ->  new HashSet<>(link.getFoundBy()).contains(toolName)).toArray().length;
-        return new MetricContainer(acceptedLinks.size(), all, toolName);
+    public MetricContainer initMetricContainer(Tool tool) {
+        List<Link> acceptedLinks = getLinks().stream().filter(link -> link.getState() == LinkState.ACCEPTED && new HashSet<>(link.getFoundBy()).contains(tool.getName())).collect(Collectors.toList());
+        int all = getLinks().stream().filter(link ->  new HashSet<>(link.getFoundBy()).contains(tool.getName())).toArray().length;
+        return new MetricContainer(acceptedLinks.size(), all, tool.getName());
     }
 
     public void updateMetricContainers(int ourPositive) {

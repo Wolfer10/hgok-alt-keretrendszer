@@ -1,11 +1,14 @@
 package com.hgok.webapp.compared;
 
+import com.hgok.webapp.tool.Tool;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -20,13 +23,21 @@ public class MetricContainer {
     @ManyToOne()
     private ComparedAnalysis comparedAnalysis;
 
+
     private String toolName;
+
+    @ManyToOne
+    @JoinColumn(name = "tool_id")
+    private Tool tool;
+
     private int truePositive;
     private int all;
     private int ourTruePositive;
     private double precision;
     private double recall;
     private double fMeasure;
+    private Time runningTime;
+
 
     public MetricContainer(int truePositive, int all, String toolName) {
         this.truePositive = truePositive;

@@ -30,7 +30,7 @@ public class ComparedAnalysisController {
     }
 
     @PostMapping("/calculateStats")
-    public String calculateStats(@RequestParam(value = "ourPositive") int ourPositive, @RequestParam(value = "id") long id){
+    public String calculateStats(@RequestParam(value = "ourPositive") int ourPositive){
         actualAnalysis.getComparedAnalysis().updateMetricContainers(ourPositive);
         return "redirect:/statistics/" + actualAnalysis.getId();
     }
