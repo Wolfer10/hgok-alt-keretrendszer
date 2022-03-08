@@ -13,15 +13,17 @@
 <table id="prec-table" class="table">
     <tr>
         <th scope="col">Az eszköz</th>
+        <th scope="col">Az eszköz futási ideje</th>
         <th scope="col">A helyesen eltalált élek száma:</th>
         <th scope="col">Az eszköz által talált <br/> összes:</th>
         <th scope="col">Általunk talált összes</th>
         <th scope="col">Precizitás</th>
-        <th scope="col">Pontosság</th>
+        <th scope="col">Lefedettség</th>
         <th scope="col">F-mesure</th>
     </tr>
     <tr th:each="metric :  ${compared.getMetricContainers()}">
-        <td th:text="${metric.getToolName()}" > </td>
+        <td th:text="${metric.getTool().getName()}" > </td>
+        <td th:text="${metric.getToolResult().getValidationLength()}" > </td>
         <td th:text="${metric.getTruePositive()}" > </td>
         <td th:text="${metric.getAll()}" > </td>
         <td th:text="${metric.getOurTruePositive()}" > </td>

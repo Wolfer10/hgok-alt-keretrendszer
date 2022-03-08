@@ -15,12 +15,16 @@ import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.tool.Tool;
 import com.hgok.webapp.util.JsonUtil;
 import com.hgok.webapp.util.NtoMReader;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class ComparedAnalysis {
 
     @Id
@@ -98,6 +102,7 @@ public class ComparedAnalysis {
     }
 
     public List<MetricContainer> getToolMetrics(){
+        clerMetricContainers();
         for (Tool tool : getAnalysis().getTools()) {
             metricContainers.add(initMetricContainer(tool));
         }
@@ -107,7 +112,7 @@ public class ComparedAnalysis {
     public MetricContainer initMetricContainer(Tool tool) {
         List<Link> acceptedLinks = getLinks().stream().filter(link -> link.getState() == LinkState.ACCEPTED && new HashSet<>(link.getFoundBy()).contains(tool.getName())).collect(Collectors.toList());
         int all = getLinks().stream().filter(link ->  new HashSet<>(link.getFoundBy()).contains(tool.getName())).toArray().length;
-        return new MetricContainer(acceptedLinks.size(), all, tool.getName());
+        return new MetricContainer(acceptedLinks.size(), all, tool);
     }
 
     public void updateMetricContainers(int ourPositive) {

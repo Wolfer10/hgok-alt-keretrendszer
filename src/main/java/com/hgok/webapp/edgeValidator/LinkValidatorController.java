@@ -2,16 +2,12 @@ package com.hgok.webapp.edgeValidator;
 
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
-import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.compared.LinkState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Controller
 public class LinkValidatorController {
@@ -53,6 +49,10 @@ public class LinkValidatorController {
     @PostMapping("/validateLink")
     @ResponseBody
     public void validateLink(@RequestParam(name = "valid_link") String validation){
+        linkStateChooser(validation);
+    }
+
+    private void linkStateChooser(String validation) {
         switch (validation) {
             case "unchecked":
                 linkIterator.current().setState(LinkState.UNCHECKED);

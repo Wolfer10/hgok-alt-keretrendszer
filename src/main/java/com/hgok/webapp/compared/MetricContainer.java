@@ -1,6 +1,7 @@
 package com.hgok.webapp.compared;
 
 import com.hgok.webapp.tool.Tool;
+import com.hgok.webapp.tool.ToolResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,11 +25,12 @@ public class MetricContainer {
     private ComparedAnalysis comparedAnalysis;
 
 
-    private String toolName;
-
     @ManyToOne
     @JoinColumn(name = "tool_id")
     private Tool tool;
+
+    @OneToOne
+    private ToolResult toolResult;
 
     private int truePositive;
     private int all;
@@ -39,11 +41,11 @@ public class MetricContainer {
     private Time runningTime;
 
 
-    public MetricContainer(int truePositive, int all, String toolName) {
+    public MetricContainer(int truePositive, int all, Tool tool) {
         this.truePositive = truePositive;
         this.all = all;
         this.precision = calculatePrecision(truePositive, all);
-        this.toolName = toolName;
+        this.tool = tool;
     }
 
     public double calculatePrecision(int truePositive, int all){

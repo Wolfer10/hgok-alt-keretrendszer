@@ -3,6 +3,7 @@ package com.hgok.webapp.analysis;
 import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.compared.ComparedAnalysisRepository;
 import com.hgok.webapp.compared.MetricContainer;
+import com.hgok.webapp.tool.ToolResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,9 @@ class AnalysisRepositoryTest {
 
     @Autowired
     ComparedAnalysisRepository comparedAnalysisRepository;
+
+    @Autowired
+    ToolResultRepository toolResultRepository;
 
     private Analysis analysis;
 
@@ -47,6 +51,9 @@ class AnalysisRepositoryTest {
     }
 
 
+    public void testFindByToolId(){
+        assertThat(toolResultRepository.getToolResultByToolIdAndAnalysisId(1L, 1L)).isNotNull();
+    }
 
     @Test
     public void testUpdateMetricContainers(){

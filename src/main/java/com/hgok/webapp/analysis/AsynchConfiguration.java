@@ -14,8 +14,14 @@ import java.util.concurrent.*;
 @EnableAsync
 public class AsynchConfiguration
 {
-    @Bean(name = "asyncExecutor")
-    public Executor asyncExecutor()
+    @Bean(name = "single-thread")
+    public Executor singleThreadAsync()
+    {
+        return Executors.newSingleThreadExecutor();
+    }
+
+    @Bean(name = "async-multithread")
+    public Executor multiThreadAsync()
     {
         return Executors.newSingleThreadExecutor();
     }

@@ -59,9 +59,9 @@ class ComparedAnalysisTest {
         Analysis analysis = initAnalysis(comparedAnalysis);
         comparedAnalysis.setAnalysis(analysis);
         comparedAnalysis.addAllMetricContainer(new ArrayList<>(List.of(
-                new MetricContainer(10,20,"alma"),
-                new MetricContainer(10,30,"körte"),
-                new MetricContainer(10,30,"barack"))));
+                new MetricContainer(10,20,new Tool()),
+                new MetricContainer(10,30,new Tool()),
+                new MetricContainer(10,30,new Tool()))));
 
         assertThat(analysis.getComparedAnalysis().getMetricContainers()).isNotEmpty().hasSize(3);
     }

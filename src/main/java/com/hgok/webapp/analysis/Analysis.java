@@ -57,17 +57,5 @@ public class Analysis {
        this.id = id;
     }
 
-    public void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths) throws IOException, InterruptedException {
-        FileHelper fileHelper = new FileHelper();
-        for(Tool filteredTool : filteredTools) {
-            new FileHelper().removeDirByName(WORKINGPATH, filteredTool.getName());
-            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(id));
-            ToolResult toolResult = new ToolResult(filteredTool, filePaths);
-            fileHelper.appendToFile(pathOfResult, toolResult.getResult());
-            ProcessHandler processHandler = new ProcessHandler();
-            processHandler.startHCGConvert(pathOfResult.getParent());
-
-        }
-    }
 
 }

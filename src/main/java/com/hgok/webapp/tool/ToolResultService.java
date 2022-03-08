@@ -10,6 +10,11 @@ public class ToolResultService {
     @Autowired
     ToolResultRepository toolResultRepository;
 
-
+    public ToolResult getToolResultByToolId(Long toolId, Long analysisId){
+        if(toolId == null){
+            throw new IllegalArgumentException();
+        }
+        return toolResultRepository.getToolResultByToolIdAndAnalysisId(toolId, analysisId);
+    }
 
 }

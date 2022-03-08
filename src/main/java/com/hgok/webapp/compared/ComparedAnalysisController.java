@@ -15,8 +15,12 @@ public class ComparedAnalysisController {
     @Autowired
     private AnalysisRepository analysisRepository;
 
-    @Autowired
     private ComparedAnalysisService comparedAnalysisService;
+
+    @Autowired
+    public ComparedAnalysisController(ComparedAnalysisService comparedAnalysisService) {
+        this.comparedAnalysisService = comparedAnalysisService;
+    }
 
     Analysis actualAnalysis;
     Long analysisId;
@@ -24,6 +28,8 @@ public class ComparedAnalysisController {
     @GetMapping("/statistics/{analysisId}")
     public String showStats(@PathVariable("analysisId") Long id, Model model) {
         initAnalysis(id);
+        comparedAnalysisService.comparedAnalysis =  actualAnalysis.getComparedAnalysis();
+        comparedAnalysisService.initToolResults();
         model.addAttribute("compared", actualAnalysis.getComparedAnalysis());
         analysisRepository.save(actualAnalysis);
         return "validated-analysis";

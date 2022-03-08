@@ -1,9 +1,12 @@
 package com.hgok.webapp.tool;
 
+import com.hgok.webapp.analysis.Analysis;
+import com.hgok.webapp.hcg.ProcessHandler;
 import com.hgok.webapp.util.FileHelper;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
 
 import javax.persistence.*;
 import javax.persistence.criteria.Fetch;
@@ -21,6 +24,7 @@ public class ToolResult {
 
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -28,24 +32,30 @@ public class ToolResult {
     byte[] result;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    Analysis analysis;
+
+    @OneToOne
     Tool tool;
 
-    private Time validationLength;
+    private Long validationLength;
 
-    public ToolResult(Tool tool, List<Path> list) throws IOException {
-        this.tool = tool;
+    public ToolResult(Tool tool, List<Path> list, Analysis analysis) throws IOException {
         initResult(tool.generateTokensFromFilePaths(list));
+        this.tool = tool;
+        this.analysis = analysis;
     }
 
-    public void initResult(String... tokens) throws IOException {
+    public Process initResult(String... tokens) throws IOException {
         ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
+        ProcessHandler processHandler = new ProcessHandler();
+        processHandler.setOs();
         Timestamp validationStart = new Timestamp(System.currentTimeMillis());
         Process rawAnalysis = toolProcessBuilder.start();
+        System.out.println(processHandler.memoryUtilizationPerProcess(rawAnalysis.pid()));
         Timestamp validationEnd = new Timestamp(System.currentTimeMillis());
-        //System.err.println( new String(rawAnalysis.getErrorStream().readAllBytes()));
-        //System.out.println( new String(rawAnalysis.getInputStream().readAllBytes()));
         result = rawAnalysis.getInputStream().readAllBytes();
-        validationLength = new Time(validationEnd.getTime() - validationStart.getTime());
+        validationLength = (validationEnd.getTime() - validationStart.getTime());
+        return rawAnalysis;
     }
 
     public void appendResultToFile(Path fullPath) throws IOException {
