@@ -5,7 +5,6 @@ import com.hgok.webapp.util.FileHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import oshi.software.os.OperatingSystem;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,7 +51,7 @@ class ToolResultTest {
 
 
     @Test
-    public void testGetToolsResult() throws IOException {
+    public void testGetToolsResult() throws IOException, ExecutionException, InterruptedException {
         String[] tokens = "node F:\\Feri\\egyetem\\szakdoga\\hcg-js-framework\\util\\js-callgraph\\js-callgraph.js --strategy NONE --cg F:\\Feri\\egyetem\\szakdoga\\hgok-alt-keretrendszer\\src\\test\\java\\com\\hgok\\webapp\\util\\TestFile.js".split(" ");
         //Path path = Path.of(analysisService.WORKINGPATH, dirName);
         result.initResult(tokens);
@@ -61,7 +60,7 @@ class ToolResultTest {
     }
 
     @Test
-    public void testWithRelativePath() throws IOException {
+    public void testWithRelativePath() throws IOException, ExecutionException, InterruptedException {
         //Path path = Path.of(analysisService.WORKINGPATH, dirName);
         result.initResult(TOKENS_RELATIVE);
         Assertions.assertTrue(result.getResult().length > 0);
@@ -69,16 +68,20 @@ class ToolResultTest {
     }
 
 
-    @Test
+
     public void memoryUsage() throws IOException, ExecutionException, InterruptedException {
         ProcessHandler processHandler = new ProcessHandler();
         processHandler.setOs();
-        CompletableFuture<Long> maxMemory = processHandler.maxMemory(result.initResult(TOKENS_RELATIVE));
+        CompletableFuture<MemoryData> maxMemory = processHandler.calculateMemoryDataFromProcess(result.initResult(TOKENS_RELATIVE));
         System.out.println(maxMemory.get());
     }
 
-    @Test
-    public void aa() throws IOException {
-        result.initResult(TOKENS_RELATIVE);
+
+    public void aa() throws IOException, ExecutionException, InterruptedException {
+        ProcessBuilder toolProcessBuilder = new ProcessBuilder(PING);
+        ProcessHandler processHandler = new ProcessHandler();
+        processHandler.setOs();
+        System.out.println(processHandler.calculateMemoryDataFromProcess(toolProcessBuilder.start()).get());
+
     }
 }

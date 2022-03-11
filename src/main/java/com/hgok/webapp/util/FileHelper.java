@@ -56,12 +56,12 @@ public class FileHelper {
 
     private List<Path> getFilePathsFromZip() throws IOException {
         List<Path> filePaths;
-        ZipReader zipReader = new ZipReader();
-        zipReader.unzip(getFilePath().toString(), FileHelper.SOURCE_FOLDER);
+        ZipReader.unzip(getFilePath(), Path.of(FileHelper.SOURCE_FOLDER));
         File dir = new File(FileHelper.SOURCE_FOLDER);
         filePaths = getFilesFromDir(dir);
         return filePaths;
     }
+
 
     public List<Path> getFilesFromDir(File dir) {
         List<Path> filePaths;

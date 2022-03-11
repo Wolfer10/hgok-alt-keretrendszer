@@ -6,15 +6,13 @@ import com.hgok.webapp.util.FileHelper;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Generated;
 
 import javax.persistence.*;
-import javax.persistence.criteria.Fetch;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Getter
 @Setter
@@ -37,24 +35,35 @@ public class ToolResult {
     @OneToOne
     Tool tool;
 
+    @OneToOne
+    private MemoryData memoryData;
+
     private Long validationLength;
 
-    public ToolResult(Tool tool, List<Path> list, Analysis analysis) throws IOException {
+    public ToolResult(Tool tool, List<Path> list, Analysis analysis) throws IOException, ExecutionException, InterruptedException {
         initResult(tool.generateTokensFromFilePaths(list));
         this.tool = tool;
         this.analysis = analysis;
     }
 
-    public Process initResult(String... tokens) throws IOException {
+    public ToolResult(Tool tool, Path path, Analysis analysis) throws IOException, ExecutionException, InterruptedException {
+        initResult(tool.generateTokensFromFilePath(path));
+        this.tool = tool;
+        this.analysis = analysis;
+    }
+
+    public Process initResult(String... tokens) throws IOException, ExecutionException, InterruptedException {
         ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
         ProcessHandler processHandler = new ProcessHandler();
         processHandler.setOs();
         Timestamp validationStart = new Timestamp(System.currentTimeMillis());
         Process rawAnalysis = toolProcessBuilder.start();
-        System.out.println(processHandler.memoryUtilizationPerProcess(rawAnalysis.pid()));
         Timestamp validationEnd = new Timestamp(System.currentTimeMillis());
+
+        //memoryData = processHandler.calculateMemoryDataFromProcess(rawAnalysis).get();
         result = rawAnalysis.getInputStream().readAllBytes();
         validationLength = (validationEnd.getTime() - validationStart.getTime());
+
         return rawAnalysis;
     }
 

@@ -1,15 +1,15 @@
 package com.hgok.webapp.hcg;
 
+import com.hgok.webapp.tool.MemoryData;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.scheduling.annotation.Async;
 import oshi.SystemInfo;
+import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class ProcessHandler {
 
@@ -45,19 +45,39 @@ public class ProcessHandler {
     }
 
     @Async("async-multithread")
-    public CompletableFuture<Long> maxMemory(Process process){
+    public CompletableFuture<MemoryData> calculateMemoryDataFromProcess(Process process) {
+        CompletableFuture<MemoryData> completableFuture = new CompletableFuture<>();
+        MemoryData memoryData = new MemoryData();
         long maxMemory = 0;
-        while (process.isAlive()){
-         maxMemory  = Math.max(maxMemory, memoryUtilizationPerProcess(process.pid()));
+        long sumMemory = 0;
+        long count = 1;
+        while (isRunning(process)) {
+            sumMemory += memoryUtilizationPerProcess(process.pid());
+            maxMemory = Math.max(maxMemory, memoryUtilizationPerProcess(process.pid()));
+            ++count;
         }
-        return CompletableFuture.completedFuture(maxMemory);
+        memoryData.setMaxMemory(maxMemory);
+        memoryData.setAverageMemory(sumMemory/count);
+        completableFuture.complete(memoryData);
+        return completableFuture;
     }
 
     public long memoryUtilizationPerProcess(long pid) {
-        System.out.println(pid);
-        System.out.println();
-        System.out.println(ProcessHandle.allProcesses().filter(processHandle -> processHandle.pid() ==  pid).collect(Collectors.toList()));
-        return os.getProcess((int) pid).getResidentSetSize();
+        OSProcess osProcess = os.getProcess((int) pid);
+        if (osProcess == null){
+           return 0;
+        }
+        return osProcess.getResidentSetSize();
+
+    }
+
+    boolean isRunning(Process process) {
+        try {
+            process.exitValue();
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
     }
 
 

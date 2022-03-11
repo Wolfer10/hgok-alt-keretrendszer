@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ToolRepository extends JpaRepository<Tool, Long>, ToolRepositoryCostum {
+public interface ToolRepository extends JpaRepository<Tool, Long> {
 
     @Query(value = "SELECT DISTINCT t.language  FROM tool t",
             nativeQuery=true)
