@@ -12,25 +12,26 @@
     <script th:src="@{/js/highlight.min.js}"></script>
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <link th:href="@{/css/validation.css}" rel="stylesheet">
+    <link th:href="@{/css/global.css}" rel="stylesheet">
 </head>
 <body>
 <div th:insert="header :: navbar"></div>
 
 <div id="main">
-    <h1 class="border">Elemzés  <span th:text="${analyis.getId()}"></span></h1>
+    <h1>Elemzés  <span th:text="${analyis.getId()}"></span></h1>
     <div th:if="${analyis.getComparedAnalysis().getLinks().size() > 0}" >
         <div th:if="${currentLink != null}" id="content">
-            <div class="grid-block border" >
-                <div class="column-wrapper border">
+            <div class="grid-block" >
+                <div class="column-wrapper">
                     <h2 th:text="${currentLink.getSourceRelativeFileName() + ' sor:' + currentLink.getSourceStartLine()}" ></h2>
                     <h3>Hívó kód</h3>
-                    <pre th:utext="${currentLink.getSourceSnippet()}"></pre>
                 </div>
-                <div class="column-wrapper border">
+                <pre class="source" th:utext="${currentLink.getSourceSnippet()}"></pre>
+                <div class="column-wrapper">
                     <h2 th:text="${currentLink.getTargetRelativeFileName() + ' sor:' + currentLink.getTargetStartLine()}" ></h2>
                     <h3>Hívott kód</h3>
-                    <pre th:utext="${currentLink.getTargetSnippet()}"></pre>
                 </div>
+                <pre class="target" th:utext="${currentLink.getTargetSnippet()}"></pre>
                 <div id="aside">
                     <div id="probs">
                         <div class="tool">
@@ -58,9 +59,9 @@
                                        th:checked="${currentLink.getState() == denied}">
                             </label>
                         </div>
-
+                        <hr>
                     </form>
-                    <div class="stepping column-wrapper border">
+                    <div class="stepping column-wrapper">
                         <form th:if="${linkIterator.hasNext()}"
                               th:action="@{/validate/{analysisId}/nextlink/{id}(id=${currentLink.getId()},analysisId=${analyis.getId()})}">
                             <input type="submit" value="Következő">
@@ -72,6 +73,7 @@
                         <form th:if="${!linkIterator.hasNext()}" th:action="@{/validate/end}" method="post">
                             <input type="submit" value="Kész">
                         </form>
+                        <hr>
                     </div>
                     <div class="flex">Validált élek aránya: <span></span> <span></span> </div>
                 </div>

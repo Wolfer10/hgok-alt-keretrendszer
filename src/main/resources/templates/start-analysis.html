@@ -4,23 +4,37 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css}" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link th:href="@{/css/form.css}" rel="stylesheet">
 </head>
 <body>
 
 <div th:insert="header :: navbar"></div>
 <script src="js/jquery-3.6.0.min.js"></script>
-<form  action="#" th:action="@{/startAnalysis}" enctype="multipart/form-data" method="post">
-    <div class="form-group">
-        <label for="ln-selector"></label>
-        <select id="ln-selector" name="language">
-            <option th:each="language : ${languages}" th:value="${language}" th:text="${language}" ></option>
-        </select>
-    </div>
+<div class="main">
+    <h1>Új elemzés indítása</h1>
+    <form  action="#" th:action="@{/startAnalysis}" enctype="multipart/form-data" method="post">
+        <div class="form-item">
+            <label for="ln-selector">Az eszköz nyelve:</label>
+            <select id="ln-selector" name="language">
+                <option th:each="language : ${languages}" th:value="${language}" th:text="${language}" ></option>
+            </select>
+        </div>
 
-    <div class="form-check" id="checkOBox"></div>
-    <input id="input" type="file" name="file">
-    <input type="submit" value="Elemzés indítása">
-</form>
+
+        <div class="form-item expanded" id="checkOBox">
+        </div>
+
+        <div class="form-item">
+            <label for="input-file">Input fájl</label>
+            <input class="form-item" id="input-file" type="file" name="file">
+        </div>
+
+        <div class="form-item">
+            <input class="form-item" type="submit" value="Elemzés indítása">
+        </div>
+    </form>
+</div>
+
 <script th:inline="javascript">
     function loadNames(){
         $.get({
@@ -29,11 +43,14 @@
         success: function(data) {
             let checkOBox = $("#checkOBox");
             checkOBox.empty();
+            checkOBox.append("<span> Eszköz kiválasztása: </span>")
+            checkOBox.append("<div id='tool-container'></div>")
+            let toolCont = $("#tool-container");
             for (const [key, value] of Object.entries(data)){
                 const checkbox = $(`<input type='checkbox' id="${value}" name="name" value='${value}'>`);
-                const label = $(`<label for="${value}">${value}</label>`);
-                checkOBox.append(checkbox);
-                checkOBox.append(label)
+                const label = $(`<label class="checkbox-label" for="${value}">${value}</label>`);
+                toolCont.append(checkbox);
+                toolCont.append(label)
             }
         }
     });}

@@ -4,25 +4,20 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light rounded" th:fragment="navbar">
-        <div class="container-fluid">
 
-            <a  th:href="@{index.html}">Főoldal</a>
-        </div>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a th:href="@{/toolList}">Eszköz Lista</a>
-                </li>
-                <li class="nav-item">
-                    <a th:href="@{/addTool}"> Eszköz hozzáadása</a>
-                </li>
-                <li class="nav-item">
-                    <a th:href="@{/startAnalysis}"> Elemzés indítása</a>
-                </li>
-                <li class="nav-item">
-                    <a th:href="@{/listAnalysis}">Futó Elemzések</a>
-                </li>
-            </ul>
+        <a class="navbar-brand" th:href="@{index.html}">Főoldal</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" th:href="@{/toolList}">Eszköz Lista</a>
+                <a class="nav-item nav-link" th:href="@{/addTool}"> Eszköz hozzáadása</a>
+                <a class="nav-item nav-link" th:href="@{/startAnalysis}"> Elemzés indítása</a>
+                <a class="nav-item nav-link" th:href="@{/listAnalysis}">Futó Elemzések</a>
+            </div>
         </div>
 
 
