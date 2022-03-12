@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -56,15 +55,16 @@ public class AnalysisService {
 
 
         FileHelper fileHelper = new FileHelper();
-        Path newDir = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());
+        Path targetPath = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());
         if (originFileName.endsWith(".zip")){
-            ZipReader.unzip(insertedFilePath, newDir);
+            ZipReader.unzip(insertedFilePath, targetPath);
         } else {
-            Path tempPath = Files.createFile(Path.of(String.valueOf(newDir), originFileName));
+            Path tempPath = Files.createFile(Path.of(String.valueOf(targetPath), originFileName));
             Files.copy(insertedFilePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
+            targetPath = tempPath;
         }
 
-        runEachToolsOnDirectory(analysis.getTools(), analysis, newDir);
+        runEachToolsOnTarget(analysis.getTools(), analysis, targetPath);
 
         JsonUtil.dumpToolNamesIntoJson(analysis.getTools(), WORKINGPATH);
 
@@ -88,12 +88,12 @@ public class AnalysisService {
         return fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), Path.of(FileHelper.SOURCE_FOLDER).getFileName().toString(), originFileName, "");
     }
 
-    private void runEachToolsOnDirectory(List<Tool> tools, Analysis analysis, Path dir) throws IOException, ExecutionException, InterruptedException {
+    private void runEachToolsOnTarget(List<Tool> tools, Analysis analysis, Path path) throws IOException, ExecutionException, InterruptedException {
         FileHelper fileHelper = new FileHelper();
         for(Tool filteredTool : tools) {
             fileHelper.removeDirByName(WORKINGPATH, filteredTool.getName());
             Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analysis.getId()), ".cgtxt");
-            ToolResult toolResult = new ToolResult(filteredTool, dir, analysis);
+            ToolResult toolResult = new ToolResult(filteredTool, path, analysis);
             toolResult.setMemoryData(toolResult.getMemoryData() != null ? toolResult.getMemoryData() : new MemoryData());
             memoryDataRepository.save(toolResult.getMemoryData());
             toolResultRepository.save(toolResult);
