@@ -54,15 +54,7 @@ public class AnalysisService {
         Files.write(insertedFilePath, file);
 
 
-        FileHelper fileHelper = new FileHelper();
-        Path targetPath = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());
-        if (originFileName.endsWith(".zip")){
-            ZipReader.unzip(insertedFilePath, targetPath);
-        } else {
-            Path tempPath = Files.createFile(Path.of(String.valueOf(targetPath), originFileName));
-            Files.copy(insertedFilePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
-            targetPath = tempPath;
-        }
+        Path targetPath = getTargetPath(analysis, originFileName, insertedFilePath);
 
         runEachToolsOnTarget(analysis.getTools(), analysis, targetPath);
 
@@ -79,6 +71,19 @@ public class AnalysisService {
         analysis.setStatus("kész");
 
         analysisRepository.save(analysis);
+    }
+
+    private Path getTargetPath(Analysis analysis, String originFileName, Path insertedFilePath) throws IOException {
+        FileHelper fileHelper = new FileHelper();
+        Path targetPath = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());
+        if (originFileName.endsWith(".zip")){
+            ZipReader.unzip(insertedFilePath, targetPath);
+        } else {
+            Path tempPath = Files.createFile(Path.of(String.valueOf(targetPath), originFileName));
+            Files.copy(insertedFilePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
+            targetPath = tempPath;
+        }
+        return targetPath;
     }
 
     private Path initFileInNewSourceFolder(String originFileName) throws IOException {
