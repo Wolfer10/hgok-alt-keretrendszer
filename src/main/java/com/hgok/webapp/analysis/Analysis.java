@@ -27,7 +27,7 @@ public class Analysis {
 
     private String pathName;
 
-    @OneToOne(fetch = FetchType.LAZY,
+    @OneToOne(
             orphanRemoval = true,
             cascade = CascadeType.ALL)
     private ComparedAnalysis comparedAnalysis;

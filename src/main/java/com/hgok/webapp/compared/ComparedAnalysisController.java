@@ -28,8 +28,6 @@ public class ComparedAnalysisController {
     @GetMapping("/statistics/{analysisId}")
     public String showStats(@PathVariable("analysisId") Long id, Model model) {
         initAnalysis(id);
-        comparedAnalysisService.comparedAnalysis =  actualAnalysis.getComparedAnalysis();
-        comparedAnalysisService.initToolResults();
         model.addAttribute("compared", actualAnalysis.getComparedAnalysis());
         analysisRepository.save(actualAnalysis);
         return "validated-analysis";
@@ -46,8 +44,9 @@ public class ComparedAnalysisController {
             analysisId = id;
             actualAnalysis = analysisRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
-            actualAnalysis.getComparedAnalysis().clerMetricContainers();
             actualAnalysis.getComparedAnalysis().getToolMetrics();
+            comparedAnalysisService.comparedAnalysis = actualAnalysis.getComparedAnalysis();
+            comparedAnalysisService.initToolResults();
         }
     }
 
