@@ -1,8 +1,9 @@
 package com.hgok.webapp.edgeValidator;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.persistence.criteria.CriteriaBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +11,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LinkIteratorTest {
 
+    LinkIterator<Integer> linkIterator;
+    @BeforeEach
+    void initIterator(){
+        linkIterator = new LinkIterator<>(initLinks());
+    }
+
     @Test
     void hasNext() {
-        LinkIterator<Integer> linkIterator = new LinkIterator<>(initLinks());
         assertTrue(linkIterator.hasNext());
         linkIterator.next();
         assertTrue(linkIterator.hasNext());
@@ -24,9 +30,8 @@ class LinkIteratorTest {
 
     @Test
     void next() {
-        LinkIterator<Integer> linkIterator = new LinkIterator<>(initLinks());
         List<Integer> temp = iterateToListEnd(linkIterator);
-        assertEquals(3,temp.size());
+        assertEquals(3, temp.size());
     }
 
     private List<Integer> iterateToListEnd(LinkIterator<Integer> linkIterator) {
@@ -39,7 +44,6 @@ class LinkIteratorTest {
 
     @Test
     void current() {
-        LinkIterator<Integer> linkIterator = new LinkIterator<>(initLinks());
         assertEquals(1, linkIterator.current());
         assertEquals(1, linkIterator.current());
         assertEquals(2, linkIterator.next());
@@ -48,7 +52,6 @@ class LinkIteratorTest {
 
     @Test
     void hasPrevious() {
-        LinkIterator<Integer> linkIterator = new LinkIterator<>(initLinks());
         assertFalse(linkIterator.hasPrevious());
         linkIterator.next();
         assertTrue(linkIterator.hasPrevious());
@@ -59,11 +62,41 @@ class LinkIteratorTest {
 
     @Test
     void previous() {
-        LinkIterator<Integer> linkIterator = new LinkIterator<>(initLinks());
         iterateToListEnd(linkIterator);
         assertEquals(3, linkIterator.previous());
         assertEquals(2, linkIterator.previous());
         assertEquals(1, linkIterator.previous());
+    }
+
+    @Test
+    public void testNextWithStep2(){
+        linkIterator.setStepSize(2);
+        linkIterator.next();
+        assertThat(linkIterator.current()).isEqualTo(3);
+    }
+
+    @Test
+    public void testHasNextWithStep2(){
+        linkIterator.setStepSize(2);
+        linkIterator.next();
+        assertThat(linkIterator.current()).isEqualTo(3);
+        assertThat(linkIterator.hasNext()).isFalse();
+    }
+
+    @Test
+    public void testhHasPrevWithStep2(){
+        linkIterator.setStepSize(2);
+        linkIterator.next();
+        assertThat(linkIterator.hasPrevious()).isTrue();
+    }
+
+    @Test
+    public void testPrevWithStep2(){
+        linkIterator.setStepSize(2);
+        linkIterator.next();
+        assertThat(linkIterator.hasPrevious()).isTrue();
+        linkIterator.previous();
+        assertThat(linkIterator.current()).isEqualTo(1);
     }
 
 
@@ -76,4 +109,9 @@ class LinkIteratorTest {
         links.add(4);
         return links;
     }
+
+
+
+
+
 }

@@ -8,11 +8,16 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Getter
-@Setter
 public class LinkIterator<T> implements Iterator<T> {
-    private List<T> list;
-    private int size;
+
+    private final List<T> list;
+    private final int size;
     private int currentPointer = 0;
+    private int stepSize = 1;
+
+    public void setStepSize(int stepSize){
+        this.stepSize = stepSize > 0 ? stepSize : 1;
+    }
 
     public LinkIterator(List<T> list) {
         this.list = list;
@@ -21,7 +26,7 @@ public class LinkIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        return currentPointer < size - 1;
+        return currentPointer + stepSize < size;
     }
 
     @Override
@@ -29,7 +34,7 @@ public class LinkIterator<T> implements Iterator<T> {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        currentPointer += 1;
+        currentPointer += stepSize;
         return list.get(currentPointer);
     }
 
@@ -41,12 +46,12 @@ public class LinkIterator<T> implements Iterator<T> {
         if (!hasPrevious()) {
             throw new NoSuchElementException();
         }
-        currentPointer -= 1;
+        currentPointer -= stepSize;
         return list.get(currentPointer);
     }
 
     public boolean hasPrevious(){
-        return currentPointer > 0;
+        return currentPointer - stepSize >= 0;
     }
 }
 

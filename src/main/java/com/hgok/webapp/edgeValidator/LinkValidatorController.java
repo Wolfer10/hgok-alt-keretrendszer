@@ -88,7 +88,6 @@ public class LinkValidatorController {
     }
 
     private void init_iterator() {
-        //System.out.println(analysis.getLinks());
         linkIterator = new LinkIterator<>(analysis.getComparedAnalysis().getLinks());
     }
 
