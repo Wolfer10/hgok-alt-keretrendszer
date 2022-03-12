@@ -28,6 +28,4 @@ public class Label {
         targetStartLine = Integer.parseInt(separetedFileNames[1].split(":")[2]);
     }
 
-
-
 }

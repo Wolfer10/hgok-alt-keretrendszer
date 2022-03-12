@@ -1,5 +1,5 @@
-pre{
-    width: max-content;
+pre {
+    width: 200px;
     height: max-content;
     display: inline-block;
     border: black solid 2px;
@@ -8,22 +8,88 @@ pre{
     background: white;
 }
 
-.container{
+
+
+.border{
+    border: 1px solid black;
+}
+
+#main{
+    margin: 50px;
+}
+
+#content{
+    border: 1px solid black;
+}
+
+#probs{
+    display: flex;
+    flex-direction: column;
+    border: 2px solid black;
+    margin: 10px;
+    padding: 20px;
+}
+
+#aside{
+    display: grid;
+    grid-template-rows: 10% 30% 30% 15% 5%;
+}
+
+.result{
+    font-size: large;
+    color: green;
+    font-weight: bold;
+}
+
+.grid-block {
+    display: grid;
+    grid-template-columns: 40% 40% 20%;
+}
+
+.flex-stretch {
     display: flex;
     flex-direction: row;
     justify-content: stretch;
-    /*border: 5px solid black;*/
 }
-.row-wrapper{
+
+.flex-align-center{
+    display: flex;
+    align-items: center;
+}
+
+.flex-start {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+}
+
+.tool-name{
+    font-weight: bold;
+    font-size: large;
+}
+
+
+
+.row-wrapper {
     display: flex;
     flex-direction: row;
 }
 
-.column-wrapper{
+.column-wrapper {
     display: flex;
     flex-direction: column;
 }
 
 form#validation-form {
-    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
+
+.labels{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+

@@ -8,7 +8,7 @@
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <!--    <link rel="stylesheet" th:href="@{/css/default.min.css}">-->
     <!--    <link rel="stylesheet" th:href="@{/css/intellij-light.min.css}">-->
-    <link rel="stylesheet" th:href="@{/static/css/vs.min.css}">
+    <link rel="stylesheet" th:href="@{/css/vs.min.css}">
     <script th:src="@{/js/highlight.min.js}"></script>
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <link th:href="@{/css/validation.css}" rel="stylesheet">
@@ -16,47 +16,77 @@
 <body>
 <div th:insert="header :: navbar"></div>
 
-<div>
-    <h1>Elemzés <span th:text="${analyis.getId()}"></span></h1>
+<div id="main">
+    <h1 class="border">Elemzés  <span th:text="${analyis.getId()}"></span></h1>
     <div th:if="${analyis.getComparedAnalysis().getLinks().size() > 0}" >
-        <h2 th:if="${currentLink != null}" th:text="${currentLink.getLabel() }"></h2>
-        <div class="container">
-            <pre th:if="${currentLink != null}" th:utext="${currentLink.getSourceSnippet()}"></pre>
-            <pre th:if="${currentLink != null}" th:utext="${currentLink.getTargetSnippet()}"></pre>
-            <!--        <p th:text="${currentLink.getAccepted()}"></p>-->
-            <div class="column-wrapper">
-                <form id="validation-form" class="column-wrapper">
-                    <label>
-                        Még talonban
-                        <input type="radio" name="valid-link" value="unchecked"
-                               th:checked="${currentLink.getState() == unchecked}">
-                    </label>
-                    <label>
-                        Helyes él
-                        <input type="radio" name="valid-link" value="accepted"
-                               th:checked="${ currentLink.getState() ==  accepted}">
-                    </label>
-                    <label>
-                        Helytelen él
-                        <input type="radio" name="valid-link" value="denied"
-                               th:checked="${currentLink.getState() == denied}">
-                    </label>
-                </form>
-                <div class="stepping column-wrapper">
-                    <form th:if="${linkIterator.hasNext()}"
-                          th:action="@{/validate/{analysisId}/nextlink/{id}(id=${currentLink.getId()},analysisId=${analyis.getId()})}">
-                        <input type="submit" value="Következő">
-                    </form>
-                    <form th:if="${linkIterator.hasPrevious()}"
-                          th:action="@{/validate/{analysisId}/prevlink/{id}(id=${currentLink.getId()},analysisId=${analyis.getId()})}">
-                        <input type="submit" value="Előző">
-                    </form>
-                    <form th:if="${!linkIterator.hasNext()}" th:action="@{/validate/end}" method="post">
-                        <input type="submit" value="Kész">
-                    </form>
+        <div th:if="${currentLink != null}" id="content">
+            <div class="grid-block border" >
+                <div class="column-wrapper border">
+                    <h2 th:text="${currentLink.getSourceRelativeFileName() + ' sor:' + currentLink.getSourceStartLine()}" ></h2>
+                    <h3>Hívó kód</h3>
+                    <pre th:utext="${currentLink.getSourceSnippet()}"></pre>
                 </div>
+                <div class="column-wrapper border">
+                    <h2 th:text="${currentLink.getTargetRelativeFileName() + ' sor:' + currentLink.getTargetStartLine()}" ></h2>
+                    <h3>Hívott kód</h3>
+                    <pre th:utext="${currentLink.getTargetSnippet()}"></pre>
+                </div>
+                <div id="aside">
+                    <div id="probs">
+                        <div class="tool">
+                            <p class="probs-item">Az eszköz ami megtalálta:</p>
+                            <p class="tool-name">Alma</p>
+                        </div>
+                        <p>Az eddigi elemzés alapján az él helyességének valószínűsége <span> 70% </span></p>
+                        <p class="result">Helyes</p>
+                    </div>
+                    <form id="validation-form">
+                        <div class="labels">
+                            <label>
+                                -
+                                <input type="radio" name="valid-link" value="unchecked"
+                                       th:checked="${currentLink.getState() == unchecked}">
+                            </label>
+                            <label>
+                                Helyes él
+                                <input type="radio" name="valid-link" value="accepted"
+                                       th:checked="${ currentLink.getState() ==  accepted}">
+                            </label>
+                            <label>
+                                Helytelen él
+                                <input type="radio" name="valid-link" value="denied"
+                                       th:checked="${currentLink.getState() == denied}">
+                            </label>
+                        </div>
+
+                    </form>
+                    <div class="stepping column-wrapper border">
+                        <form th:if="${linkIterator.hasNext()}"
+                              th:action="@{/validate/{analysisId}/nextlink/{id}(id=${currentLink.getId()},analysisId=${analyis.getId()})}">
+                            <input type="submit" value="Következő">
+                        </form>
+                        <form th:if="${linkIterator.hasPrevious()}"
+                              th:action="@{/validate/{analysisId}/prevlink/{id}(id=${currentLink.getId()},analysisId=${analyis.getId()})}">
+                            <input type="submit" value="Előző">
+                        </form>
+                        <form th:if="${!linkIterator.hasNext()}" th:action="@{/validate/end}" method="post">
+                            <input type="submit" value="Kész">
+                        </form>
+                    </div>
+                    <div class="flex">Validált élek aránya: <span></span> <span></span> </div>
+                </div>
+
             </div>
+            <!--        <p th:text="${currentLink.getAccepted()}"></p>-->
+
         </div>
+        <div th:unless="${currentLink != null}">
+            <form th:action="@{/validate/end}" method="post">
+                <input type="submit" value="Kész">
+            </form>
+            Valami hiba történt
+        </div>
+
     </div>
     <div th:unless="${analyis.getComparedAnalysis().getLinks().size() > 0}">
         <form th:action="@{/validate/end}" method="post">

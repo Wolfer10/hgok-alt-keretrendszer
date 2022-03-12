@@ -13,6 +13,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.tool.Tool;
+import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
 import com.hgok.webapp.util.NtoMReader;
 import lombok.AllArgsConstructor;
@@ -98,6 +99,10 @@ public class ComparedAnalysis {
             NtoMReader ntoMTargetReader = new NtoMReader(label.getTargetFileName());
             label.getLink().setSourceSnippet(ntoMSourceReader.readFromNToEnd(label.getSourceStartLine()));
             label.getLink().setTargetSnippet(ntoMTargetReader.readFromNToEnd(label.getTargetStartLine()));
+            label.getLink().setSourceRelativeFileName(FileHelper.getRelativeName(label.getSourceFileName()));
+            label.getLink().setTargetRelativeFileName(FileHelper.getRelativeName(label.getTargetFileName()));
+            label.getLink().setSourceStartLine(label.getSourceStartLine());
+            label.getLink().setTargetStartLine(label.getTargetStartLine());
         });
     }
 

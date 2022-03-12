@@ -38,10 +38,20 @@ public class Link {
 
     @Lob
     private String targetSnippet;
+
+    private String targetRelativeFileName;
+    private String sourceRelativeFileName;
+
+    private int sourceStartLine;
+    private int targetStartLine;
+
+
     @Lob
     private String sourceSnippet;
 
     @Enumerated(value = EnumType.STRING)
     private LinkState state = LinkState.UNCHECKED;
+
+
 
 }

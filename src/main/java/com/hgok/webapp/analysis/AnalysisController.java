@@ -51,10 +51,10 @@ public class AnalysisController {
     @PostMapping("/startAnalysis")
     String startAnalysis(@RequestParam(value = "name") String[] names, @RequestParam(value = "file") MultipartFile analysisFile) throws IOException, InterruptedException, ExecutionException {
         List<Tool> filteredTools = analysisService.filterTools(names);
-        Analysis analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()));
+        String originalFilename = analysisFile.getOriginalFilename();
+        Analysis analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()), originalFilename);
         analysisRepository.save(analysis);
-
-        analysisService.startAnalysis(analysis, IOUtils.toByteArray((analysisFile.getInputStream())), analysisFile.getOriginalFilename());
+        analysisService.startAnalysis(analysis, IOUtils.toByteArray((analysisFile.getInputStream())), originalFilename);
 
         return "redirect:/listAnalysis";
     }

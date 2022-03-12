@@ -50,8 +50,10 @@ public class AnalysisService {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
 
+
         Path insertedFilePath = initFileInNewSourceFolder(originFileName);
         Files.write(insertedFilePath, file);
+
 
         FileHelper fileHelper = new FileHelper();
         Path newDir = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());

@@ -36,6 +36,12 @@ public class FileHelper {
         return Files.write(fullPath, result);
     }
 
+
+    public static String getRelativeName(String filename){
+        return filename.split("/")[filename.split("/").length - 2] + "/" + filename.split("/")[filename.split("/").length - 1];
+    }
+
+
     public void deleteFileIfExits(Path fullPath) throws IOException {
         if (fullPath.toFile().exists() && fullPath.toFile().isDirectory()) {
             FileUtils.deleteDirectory(fullPath.toFile());
