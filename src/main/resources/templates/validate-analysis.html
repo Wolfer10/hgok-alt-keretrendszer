@@ -35,11 +35,16 @@
                 <div id="aside">
                     <div id="probs">
                         <div class="tool">
-                            <p class="probs-item">Az eszköz ami megtalálta:</p>
-                            <p class="tool-name">Alma</p>
+                            <p class="probs-item">Az eszköz(ök) ami megtalálta:</p>
+                            <ul class="tool-name" th:each="toolName : ${currentLink.getFoundBy()}">
+                                <li th:text="${toolName}"></li>
+                            </ul>
                         </div>
-                        <p>Az eddigi elemzés alapján az él helyességének valószínűsége <span> 70% </span></p>
-                        <p class="result">Helyes</p>
+                        <p>Az eddigi elemzés alapján az él helyességének valószínűsége
+                            <span> 70% </span>
+                            <span class="result"> -> Helyes</span>
+                        </p>
+
                     </div>
                     <form id="validation-form">
                         <div class="labels">
@@ -75,7 +80,7 @@
                         </form>
                         <hr>
                     </div>
-                    <div class="flex">Validált élek aránya: <span></span> <span></span> </div>
+                    <div class="flex"><span th:text="${linkIterator.currentPointer + 1}"> </span> / <span th:text="${linkIterator.size}"></span> </div>
                 </div>
 
             </div>
