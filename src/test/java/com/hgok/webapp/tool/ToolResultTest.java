@@ -38,11 +38,11 @@ class ToolResultTest {
         result.setResult((expected + "\n").getBytes());
         FileHelper fileHelper = new FileHelper();
         fileHelper.removeDirByName(Path.of(TOOL_DIR).toString(), expected);
-        Path expectedPath = fileHelper.createDirAndInsertFile(Path.of(TOOL_DIR), expected);
+        Path expectedPath = fileHelper.createDirAndInsertFile(Path.of(TOOL_DIR), expected, ".cgtxt");
         String expectedFileName = expected + ".cgtxt";
         assertThat(expectedPath).exists().isEmptyFile().hasFileName(expectedFileName);
-        result.appendResultToFile(expectedPath);
-        result.appendResultToFile(expectedPath);
+        fileHelper.appendToFile(expectedPath, result.getResult());
+        fileHelper.appendToFile(expectedPath, result.getResult());
         assertThat(expectedPath).exists().isNotEmptyFile();
         assertThat(Files.readAllLines(expectedPath)).hasSize(2);
         assertThat(Files.readAllLines(expectedPath).get(0)).isEqualTo(expected);

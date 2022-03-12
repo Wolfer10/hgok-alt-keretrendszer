@@ -55,7 +55,7 @@ public class ToolResult {
     public Process initResult(String... tokens) throws IOException, ExecutionException, InterruptedException {
         ProcessBuilder toolProcessBuilder = new ProcessBuilder(tokens);
         ProcessHandler processHandler = new ProcessHandler();
-        processHandler.setOs();
+        //processHandler.setOs();
         Timestamp validationStart = new Timestamp(System.currentTimeMillis());
         Process rawAnalysis = toolProcessBuilder.start();
         Timestamp validationEnd = new Timestamp(System.currentTimeMillis());
@@ -66,11 +66,5 @@ public class ToolResult {
 
         return rawAnalysis;
     }
-
-    public void appendResultToFile(Path fullPath) throws IOException {
-        FileHelper fileHelper = new FileHelper();
-        fileHelper.appendToFile(fullPath, result);
-    }
-
 
 }

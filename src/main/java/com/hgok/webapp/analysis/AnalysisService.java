@@ -2,20 +2,22 @@ package com.hgok.webapp.analysis;
 
 import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.hcg.ProcessHandler;
-import com.hgok.webapp.tool.Tool;
-import com.hgok.webapp.tool.ToolRepository;
-import com.hgok.webapp.tool.ToolResult;
-import com.hgok.webapp.tool.ToolResultRepository;
+import com.hgok.webapp.tool.*;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
+import com.hgok.webapp.util.ZipReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Timestamp;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -34,24 +36,35 @@ public class AnalysisService {
     private ToolResultRepository toolResultRepository;
 
 
+    @Autowired
+    private MemoryDataRepository memoryDataRepository;
+
+
     public List<Analysis> getOrderedAnalysises(){
         return StreamSupport.stream(analysisRepository.findAll().spliterator(), false)
                 .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
     }
 
     @Async("single-thread")
-    public void startAnalysis(Analysis analysis, byte[] file, String originFileName) throws IOException, InterruptedException {
+    public void startAnalysis(Analysis analysis, byte[] file, String originFileName) throws IOException, InterruptedException, ExecutionException {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
 
+        Path insertedFilePath = initFileInNewSourceFolder(originFileName);
+        Files.write(insertedFilePath, file);
 
-        List<Path> filePaths = saveFileIntoSourceFolder(file, originFileName);
+        FileHelper fileHelper = new FileHelper();
+        Path newDir = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());
+        if (originFileName.endsWith(".zip")){
+            ZipReader.unzip(insertedFilePath, newDir);
+        } else {
+            Path tempPath = Files.createFile(Path.of(String.valueOf(newDir), originFileName));
+            Files.copy(insertedFilePath, tempPath, StandardCopyOption.REPLACE_EXISTING);
+        }
 
-        runEachToolsOnEachFiles(analysis.getTools(), filePaths, analysis);
+        runEachToolsOnDirectory(analysis.getTools(), analysis, newDir);
 
         JsonUtil.dumpToolNamesIntoJson(analysis.getTools(), WORKINGPATH);
-
-        analysis.setFileNames(filePaths.stream().map(filePath -> filePath.getFileName().toString()).collect(Collectors.toList()));
 
         ProcessHandler processHandler = new ProcessHandler();
 
@@ -66,17 +79,26 @@ public class AnalysisService {
         analysisRepository.save(analysis);
     }
 
-    private List<Path> saveFileIntoSourceFolder(byte[] file, String fileName) throws IOException {
+    private Path initFileInNewSourceFolder(String originFileName) throws IOException {
         FileHelper fileHelper = new FileHelper();
-        resetSourceFilesFolder(fileHelper);
-
-        fileHelper.setFilePath(fileHelper.writeBytesIntoNewFile(FileHelper.SOURCE_FOLDER, fileName, file));
-        return fileHelper.getFilePaths();
+        File file1 = new File(FileHelper.SOURCE_FOLDER);
+        fileHelper.deleteFileIfExits(file1.toPath());
+        return fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), Path.of(FileHelper.SOURCE_FOLDER).getFileName().toString(), originFileName, "");
     }
 
-    private void resetSourceFilesFolder(FileHelper fileHelper) throws IOException {
-        fileHelper.removeDirByName(FileHelper.SOURCE_FOLDER, "sourceFiles");
-        fileHelper.createDirectoryFromName(FileHelper.SOURCE_FOLDER, "sourceFiles");
+    private void runEachToolsOnDirectory(List<Tool> tools, Analysis analysis, Path dir) throws IOException, ExecutionException, InterruptedException {
+        FileHelper fileHelper = new FileHelper();
+        for(Tool filteredTool : tools) {
+            fileHelper.removeDirByName(WORKINGPATH, filteredTool.getName());
+            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analysis.getId()), ".cgtxt");
+            ToolResult toolResult = new ToolResult(filteredTool, dir, analysis);
+            toolResult.setMemoryData(toolResult.getMemoryData() != null ? toolResult.getMemoryData() : new MemoryData());
+            memoryDataRepository.save(toolResult.getMemoryData());
+            toolResultRepository.save(toolResult);
+            Files.write(pathOfResult, toolResult.getResult());
+            ProcessHandler processHandler = new ProcessHandler();
+            processHandler.startHCGConvert(pathOfResult.getParent());
+        }
     }
 
     public List<Tool> filterTools(String[] toolNames) {
@@ -86,20 +108,6 @@ public class AnalysisService {
             filteredTools.addAll(tools.stream().filter(tool -> tool.getName().equals(name)).collect(Collectors.toList()));
         }
         return filteredTools;
-    }
-
-    public void runEachToolsOnEachFiles(List<Tool> filteredTools, List<Path> filePaths, Analysis analysis) throws IOException {
-        FileHelper fileHelper = new FileHelper();
-        for(Tool filteredTool : filteredTools) {
-            new FileHelper().removeDirByName(WORKINGPATH, filteredTool.getName());
-            Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analysis.getId()));
-            ToolResult toolResult = new ToolResult(filteredTool, filePaths, analysis);
-            toolResultRepository.save(toolResult);
-            fileHelper.appendToFile(pathOfResult, toolResult.getResult());
-            ProcessHandler processHandler = new ProcessHandler();
-            processHandler.startHCGConvert(pathOfResult.getParent());
-
-        }
     }
 
 }

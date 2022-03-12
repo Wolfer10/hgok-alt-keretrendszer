@@ -142,10 +142,10 @@ public class FileHelperTest {
 
     @Test
     void createFileOrGetPath() throws IOException {
-        Path path = fileHelper.createDirAndInsertFile( Path.of(TESTDIR),"elem");
+        Path path = fileHelper.createDirAndInsertFile( Path.of(TESTDIR),"elem", ".cgtxt");
         assertThat(path).exists().isEmptyFile().hasFileName("elem.cgtxt");
         //FileHelper.removeDirByNames(String.valueOf(Path.of(TESTDIR)), List.of(new Tool("elem")));
-        Path path2 = fileHelper.createDirAndInsertFile(Path.of(TESTDIR),"elem");
+        Path path2 = fileHelper.createDirAndInsertFile(Path.of(TESTDIR),"elem", ".cgtxt");
         assertThat(path2).exists().isEmptyFile();
     }
 

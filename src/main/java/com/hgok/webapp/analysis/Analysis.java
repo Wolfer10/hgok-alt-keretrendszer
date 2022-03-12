@@ -36,7 +36,7 @@ public class Analysis {
     @ElementCollection
     private List<String> fileNames;
 
-    @OneToOne(
+    @OneToOne(fetch = FetchType.LAZY,
             orphanRemoval = true,
             cascade = CascadeType.ALL)
     private ComparedAnalysis comparedAnalysis;

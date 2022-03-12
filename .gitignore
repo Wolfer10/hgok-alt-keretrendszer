@@ -62,3 +62,5 @@ src/test/java/com/hgok/webapp/util/Alma/
 *.txt
 
 src/test/java/com/hgok/webapp/util/destDir2/example-repo/
+
+src/test/java/com/hgok/webapp/util/destDir4/

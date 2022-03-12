@@ -43,7 +43,6 @@ public class FileHelper {
             Files.delete(fullPath);
         }
     }
-
     public List<Path> getFilePaths() throws IOException {
         List<Path> filePaths = new ArrayList<>();
         if ("zip".equals(filePath.getFileName().toString().split("\\.")[1])){
@@ -83,13 +82,14 @@ public class FileHelper {
         }
     }
 
-    public Path createDirAndInsertFile(Path path, String fileName) throws IOException {
-        return getPath(path, fileName, fileName, ".cgtxt");
+    public Path createDirAndInsertFile(Path path, String fileName, String ext) throws IOException {
+        return getPath(path, fileName, fileName, ext);
     }
 
-    public Path createDirAndInsertFile(Path path, String dirName, String fileName) throws IOException {
-        return getPath(path, dirName, fileName, ".cgtxt");
+    public Path createDirAndInsertFile(Path path, String dirName, String fileName, String ext) throws IOException {
+        return getPath(path, dirName, fileName, ext);
     }
+
 
     private Path getPath(Path path, String dirName, String fileName, String ext) throws IOException {
         Path dir = createDirectoryFromName(String.valueOf(path), dirName);
