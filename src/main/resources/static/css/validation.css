@@ -1,29 +1,106 @@
-pre{
-    width: max-content;
+#main{
+    margin: 50px;
+}
+
+pre {
     height: max-content;
     display: inline-block;
     border: black solid 2px;
-    margin: 15px;
+    /*margin: 10px;*/
     padding: 10px;
     background: white;
 }
+h1{
+    margin: 0 0 20px;
+}
+h2, h3{
+    /*margin-left: 10px;*/
+}
 
-.container{
+.grid-block {
+    display: grid;
+    grid-template-columns: 40% 40% 20%;
+    grid-template-rows: 15% 85%;
+    column-gap: 10px;
+    row-gap: 20px;
+
+}
+
+#aside{
+    font-size: large;
+    display: grid;
+    grid-template-rows: 40% 40% 15% 5%;
+    grid-row-start: 2;
+    grid-column-start: 3;
+    border: 1px solid black;
+    padding: 10px   ;
+}
+
+.source, .target{
+    grid-row-start: 2;
+}
+
+form#validation-form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+}
+
+#probs{
+    display: flex;
+    flex-direction: column;
+    /*border: 2px solid black;*/
+    padding: 10px;
+}
+
+.labels{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.tool-name{
+    font-weight: bold;
+    font-size: large;
+}
+
+.result{
+    font-size: large;
+    color: green;
+    font-weight: bold;
+}
+
+.flex-stretch {
     display: flex;
     flex-direction: row;
     justify-content: stretch;
-    /*border: 5px solid black;*/
 }
-.row-wrapper{
+
+.flex-align-center{
+    display: flex;
+    align-items: center;
+}
+
+
+
+.flex-start {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+}
+
+.row-wrapper {
     display: flex;
     flex-direction: row;
 }
 
-.column-wrapper{
+.border{
+    border: 1px solid black;
+}
+
+.column-wrapper {
     display: flex;
     flex-direction: column;
 }
 
-form#validation-form {
-    margin: 15px 0;
-}

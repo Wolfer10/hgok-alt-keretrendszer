@@ -1,0 +1,20 @@
+button{
+    border: 1px solid black;
+    color: black;
+    box-shadow: 1px 2px black;
+    background-color: white;
+    border-radius: 5px;
+    transition: background-color 0.5s;
+}
+button:hover{
+    background-color: #dfdfdf;
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}
+
+a:hover{
+    color: black;
+}

@@ -1,0 +1,70 @@
+.main{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 30px 0 0 30px;
+}
+
+h1{
+    margin-bottom: 30px;
+}
+
+form{
+    border: 2px solid black;
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 60% 40%;
+    width: 500px;
+    border-radius: 10px;
+    box-shadow: 1px 3px black;
+}
+
+.expanded{
+    grid-column-end: 3;
+}
+
+.form-item{
+    display: flex;
+    flex-direction: column;
+    grid-column-start: 1;
+    margin: 10px 0 0 10px;
+}
+
+input[type=submit]{
+    width: max-content;
+    margin: 0 auto 10px auto;
+
+}
+
+#tool-container{
+    display: grid;
+    grid-template-columns: 5% 95%;
+    grid-template-rows: auto;
+    align-items: baseline;
+}
+#tool-container input{
+    grid-column-start: 1;
+}
+#tool-container .checkbox-label{
+    grid-column-start: 2;
+}
+
+input[type="submit"]{
+    border: 1px solid black;
+    color: black;
+    box-shadow: 1px 2px black;
+    background-color: white;
+    border-radius: 5px;
+    transition: background-color 0.5s;
+}
+
+input, textarea
+{
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+input[type="submit"]:hover{
+    background-color: #dfdfdf;
+}

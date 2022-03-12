@@ -63,9 +63,9 @@ public class Tool {
         return compilerName;
     }
 
-    public String[] generateTokensFromFilePath(Path filePath) {
+    public String[] generateTokensFromFilePath(Path dir) {
         String[] tempTokens = new String[]{ getCompilerNameFromTool(), getPath() };
-        return Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(getArguments(), filePath).split(" ")))
+        return Stream.concat(Arrays.stream(tempTokens), Arrays.stream(String.format(getArguments(), dir).split(" ")))
                 .toArray(String[]::new);
     }
 
