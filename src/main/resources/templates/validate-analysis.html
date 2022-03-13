@@ -36,7 +36,7 @@
                     <div id="probs">
                         <div class="tool">
                             <p class="probs-item">Az eszköz(ök) ami megtalálta:</p>
-                            <ul class="tool-name" th:each="toolName : ${currentLink.getFoundBy()}">
+                            <ul class="tool-name" th:each="toolName : ${foundBy}">
                                 <li th:text="${toolName}"></li>
                             </ul>
                         </div>
@@ -114,7 +114,6 @@
                 event.preventDefault(); // prevent form submission and reloading the page.
             });
             $("input[name='valid-link']").change(exucute_validation);
-            console.log("HELLLOO");
             //console.log(document.querySelectorAll('pre'));
             document.querySelectorAll('pre').forEach((el) => {
                 hljs.highlightElement(el);

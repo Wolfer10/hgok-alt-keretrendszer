@@ -3,7 +3,10 @@ package com.hgok.webapp.edgeValidator;
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
 import com.hgok.webapp.compared.Link;
+import com.hgok.webapp.compared.LinkRepository;
 import com.hgok.webapp.compared.LinkState;
+import com.hgok.webapp.tool.ToolRepository;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +17,9 @@ public class LinkValidatorController {
 
     @Autowired
     private AnalysisRepository analysisRepository;
+
+    @Autowired
+    private LinkRepository linkRepository;
 
     LinkIterator<Link> linkIterator;
     Analysis analysis;
@@ -29,13 +35,17 @@ public class LinkValidatorController {
     }
 
     @GetMapping("/validate/{analysisId}/nextlink/{id}")
-    public String stepForward() {
-        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), linkIterator.next().getId());
+    public String stepForward(Model model) {
+        Link next = linkIterator.next();
+        model.addAttribute("foundBy", linkRepository.getFoundBysByLink(next.getId()));
+        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), next.getId());
     }
 
     @GetMapping("/validate/{analysisId}/prevlink/{id}")
-    public String stepBackwards() {
-        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), linkIterator.previous().getId());
+    public String stepBackwards(Model model) {
+        Link previous = linkIterator.previous();
+        model.addAttribute("foundBy", linkRepository.getFoundBysByLink(previous.getId()));
+        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), previous.getId());
     }
 
     @PostMapping("/validate/end")
@@ -79,6 +89,7 @@ public class LinkValidatorController {
             init_iterator();
         }
         model.addAttribute("currentLink", linkIterator.current());
+        model.addAttribute("foundBy", linkRepository.getFoundBysByLink(linkIterator.current().getId()));
         init_model(model);
     }
 
@@ -87,12 +98,17 @@ public class LinkValidatorController {
         model.addAttribute("analyis", analysis);
     }
 
+
+
     private void init_iterator() {
         linkIterator = new LinkIterator<>(analysis.getComparedAnalysis().getLinks());
+
     }
 
     private Analysis init_analysis(@PathVariable("id") Long id) {
-        return analysisRepository.findById(id)
+        Analysis analysis = analysisRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+        Hibernate.initialize(analysis.getComparedAnalysis().getLinks());
+        return analysis;
     }
 }

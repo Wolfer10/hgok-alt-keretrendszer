@@ -22,12 +22,12 @@ public class Analysis {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany()
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<Tool> tools;
 
     private String pathName;
 
-    @OneToOne(
+    @OneToOne(fetch = FetchType.LAZY,
             orphanRemoval = true,
             cascade = CascadeType.ALL)
     private ComparedAnalysis comparedAnalysis;
