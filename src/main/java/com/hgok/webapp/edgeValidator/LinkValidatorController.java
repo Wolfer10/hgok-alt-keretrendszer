@@ -5,12 +5,13 @@ import com.hgok.webapp.analysis.AnalysisRepository;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.compared.LinkRepository;
 import com.hgok.webapp.compared.LinkState;
-import com.hgok.webapp.tool.ToolRepository;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 public class LinkValidatorController {
@@ -101,8 +102,18 @@ public class LinkValidatorController {
 
 
     private void init_iterator() {
-        linkIterator = new LinkIterator<>(analysis.getComparedAnalysis().getLinks());
+        List<Link> links = analysis.getComparedAnalysis().getLinks();
+        linkIterator = new LinkIterator<>(links);
+        setStepSizeAndPointer();
 
+    }
+
+    private void setStepSizeAndPointer() {
+        SampleSizeCalculator sizeCalculator = new SampleSizeCalculator(linkIterator.getSize(), 0.05, "80%", 0.5);
+        sizeCalculator.calculate();
+        sizeCalculator.setStepSize();
+        linkIterator.setStepSize(sizeCalculator.getStepSize());
+        linkIterator.setCurrentPointer(sizeCalculator.getPointer(linkIterator.getStepSize()));
     }
 
     private Analysis init_analysis(@PathVariable("id") Long id) {
