@@ -6,6 +6,8 @@ import com.hgok.webapp.tool.*;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
 import com.hgok.webapp.util.ZipReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ import java.util.stream.StreamSupport;
 public class AnalysisService {
 
     public static final String WORKINGPATH = "src/main/resources/static/working-dir/";
+    private static final Logger logger = LoggerFactory.getLogger(AnalysisService.class);
+
 
     @Autowired
     private AnalysisRepository analysisRepository;
@@ -52,18 +56,12 @@ public class AnalysisService {
 
         Path insertedFilePath = initFileInNewSourceFolder(originFileName);
         Files.write(insertedFilePath, file);
-
-
         Path targetPath = getTargetPath(analysis, originFileName, insertedFilePath);
-
+        logger.error("Kicsomagolás vége: " + targetPath);
         runEachToolsOnTarget(analysis.getTools(), analysis, targetPath);
-
         JsonUtil.dumpToolNamesIntoJson(analysis.getTools(), WORKINGPATH);
-
         ProcessHandler processHandler = new ProcessHandler();
-
         processHandler.startHCGCompare(WORKINGPATH);
-
         analysis.setComparedAnalysis(
                 ComparedAnalysis.initComparedAnalysis(
                         Path.of(FileHelper.COMPARED_FOLDER, analysis.getId() + ".json"),

@@ -15,7 +15,7 @@ public class CompareTest {
 
    @Test
    @Deprecated
-    public void testHCGCompareCreateFile() throws IOException {
+    public void testHCGCompareCreateFile() throws IOException, InterruptedException {
         new ProcessHandler().startHCGCompare(ConvertTest.HCG_TESTDIR);
         Assertions.assertTrue(Path.of(COMPARED_DIR).toFile().exists());
         Assertions.assertTrue(Path.of(COMPARED_DIR, "callgraph.json").toFile().exists());

@@ -20,6 +20,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.C;
+import org.hibernate.Hibernate;
 
 @Setter
 @Getter
@@ -48,19 +50,36 @@ public class ComparedAnalysis {
 
     @SerializedName("nodes")
     @Expose
-    @OneToMany(fetch = FetchType.LAZY,
+    @OneToMany( mappedBy = "comparedAnalysis",
+            fetch = FetchType.LAZY,
             orphanRemoval = true,
             cascade = CascadeType.ALL)
-    public List<Node> nodes = null;
+    public List<Node> nodes;
 
     @SerializedName("links")
     @Expose
-    @OneToMany(fetch = FetchType.LAZY,
+    @OneToMany(mappedBy = "comparedAnalysis",
+            fetch = FetchType.LAZY,
             orphanRemoval = true,
             cascade = CascadeType.ALL)
-    public List<Link> links = null;
+    public List<Link> links;
 
-    @OneToMany(fetch = FetchType.LAZY,
+    @OneToMany(mappedBy = "comparedAnalysis",
+            fetch = FetchType.LAZY,
+            orphanRemoval = true,
+            cascade = CascadeType.ALL
+    )
+    private List<Link> validatedLinks = new ArrayList<>();
+
+    public void addToValidatedLinks(Link link){
+        validatedLinks.add(link);
+    }
+    public void clearValidatedLinks(){
+       validatedLinks.clear();
+    }
+
+    @OneToMany(mappedBy = "comparedAnalysis",
+            fetch = FetchType.LAZY,
             orphanRemoval = true,
             cascade = CascadeType.ALL)
     private List<MetricContainer> metricContainers = new ArrayList<>();
@@ -78,17 +97,19 @@ public class ComparedAnalysis {
     }
 
     public static ComparedAnalysis initComparedAnalysis(Path filePath, Analysis analysis) {
-        ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
         try {
-            comparedAnalysis = JsonUtil.getComparedToolsFromJson(filePath.toString());
+            final ComparedAnalysis comparedAnalysis = JsonUtil.getComparedToolsFromJson(filePath.toString());
+            comparedAnalysis.links.forEach(link -> link.setComparedAnalysis(comparedAnalysis));
+            comparedAnalysis.nodes.forEach(node -> node.setComparedAnalysis(comparedAnalysis));
             comparedAnalysis.setValidationTime(new Timestamp(System.currentTimeMillis()));
             comparedAnalysis.setFileName(filePath.getFileName().toString());
             comparedAnalysis.setAnalysis(analysis);
             comparedAnalysis.setLinkSourceAndTarget();
+            return comparedAnalysis;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return new ComparedAnalysis();
         }
-        return comparedAnalysis;
     }
 
     public void setLinkSourceAndTarget() {
@@ -115,8 +136,8 @@ public class ComparedAnalysis {
     }
 
     public MetricContainer initMetricContainer(Tool tool) {
-        List<Link> acceptedLinks = getLinks().stream().filter(link -> link.getState() == LinkState.ACCEPTED && new HashSet<>(link.getFoundBy()).contains(tool.getName())).collect(Collectors.toList());
-        int all = getLinks().stream().filter(link ->  new HashSet<>(link.getFoundBy()).contains(tool.getName())).toArray().length;
+        List<Link> acceptedLinks = validatedLinks.stream().filter(link -> link.getState() == LinkState.ACCEPTED && new HashSet<>(link.getFoundBy()).contains(tool.getName())).collect(Collectors.toList());
+        int all = validatedLinks.stream().filter(link ->  new HashSet<>(link.getFoundBy()).contains(tool.getName())).toArray().length;
         return new MetricContainer(acceptedLinks.size(), all, tool);
     }
 

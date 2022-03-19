@@ -1,8 +1,5 @@
-package com.hgok.webapp.analysis;
+package com.hgok.webapp;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -12,7 +9,7 @@ import java.util.concurrent.*;
 
 @Configuration
 @EnableAsync
-public class AsynchConfiguration
+public class AsyncConfiguration
 {
     @Bean(name = "single-thread")
     public Executor singleThreadAsync()

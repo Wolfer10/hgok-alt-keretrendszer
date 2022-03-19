@@ -21,15 +21,15 @@ public class MetricContainer {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne()
+    @ManyToOne(targetEntity=ComparedAnalysis.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "compared_analysis_id")
     private ComparedAnalysis comparedAnalysis;
 
-
-    @ManyToOne
+    @ManyToOne(targetEntity=Tool.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "tool_id")
     private Tool tool;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private ToolResult toolResult;
 
     private int truePositive;

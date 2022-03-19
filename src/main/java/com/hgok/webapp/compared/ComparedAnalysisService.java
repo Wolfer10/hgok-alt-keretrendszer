@@ -33,9 +33,9 @@ public class ComparedAnalysisService {
     }
 
     public void initToolResults(){
-        comparedAnalysis.getToolMetrics().forEach(metricContainer -> metricContainer
-                .setToolResult(toolResultService.getToolResultByToolId(metricContainer.getTool().getId(), comparedAnalysis.getAnalysis().getId())))
-        ;
+        comparedAnalysis.getToolMetrics().forEach(metricContainer -> {
+            metricContainer.setToolResult(toolResultService.getToolResultByToolId(metricContainer.getTool().getId(), comparedAnalysis.getAnalysis().getId()));
+        });
     }
 
 

@@ -19,6 +19,10 @@ public class Node {
     @Expose (serialize = false, deserialize = false)
     private Long generatedId;
 
+    @ManyToOne
+    @JoinColumn(name = "compared_analysis_id")
+    ComparedAnalysis comparedAnalysis;
+
     @SerializedName("id")
     @Expose
     public Long number;

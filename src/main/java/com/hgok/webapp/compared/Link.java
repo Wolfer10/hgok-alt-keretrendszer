@@ -15,11 +15,23 @@ import lombok.ToString;
 @Getter
 @Entity
 @ToString
+@NamedEntityGraph(
+        name = "link.foundBy",
+        attributeNodes = @NamedAttributeNode("foundBy")
+)
 public class Link {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @ManyToOne(targetEntity=ComparedAnalysis.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "compared_analysis_id")
+    ComparedAnalysis comparedAnalysis;
+
+    @ManyToOne(targetEntity=ComparedAnalysis.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "validated_compared_analysis_id")
+    ComparedAnalysis validatedComparedAnalysis;
 
     @SerializedName("target")
     @Expose
@@ -30,7 +42,7 @@ public class Link {
     @SerializedName("label")
     @Expose
     @Lob
-    private String label;
+        private String label;
     @SerializedName("foundBy")
     @Expose
     @ElementCollection
@@ -51,6 +63,7 @@ public class Link {
 
     @Enumerated(value = EnumType.STRING)
     private LinkState state = LinkState.UNCHECKED;
+
 
 
 

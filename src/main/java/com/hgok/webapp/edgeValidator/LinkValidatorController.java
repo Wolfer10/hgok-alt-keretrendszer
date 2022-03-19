@@ -70,9 +70,11 @@ public class LinkValidatorController {
                 break;
             case "accepted" :
                 linkIterator.current().setState(LinkState.ACCEPTED);
+                analysis.getComparedAnalysis().addToValidatedLinks(linkIterator.current());
                 break;
             case "denied":
                 linkIterator.current().setState(LinkState.DENIED);
+                analysis.getComparedAnalysis().addToValidatedLinks(linkIterator.current());
                 break;
         }
     }

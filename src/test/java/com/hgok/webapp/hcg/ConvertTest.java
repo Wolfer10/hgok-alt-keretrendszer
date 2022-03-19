@@ -11,7 +11,7 @@ public class ConvertTest {
     public static final String HCG_TESTDIR = "src/test/java/com/hgok/webapp/hcg/testdir/";
 
     @Test
-    public void testJsonFileExits() throws IOException {
+    public void testJsonFileExits() throws IOException, InterruptedException {
         String dirName = "TEST-TOOL";
         String expectedFile = "alma" + ".json";
         String expectedPath = HCG_TESTDIR;

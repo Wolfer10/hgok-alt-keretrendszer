@@ -1,7 +1,10 @@
 package com.hgok.webapp.hcg;
 
+import com.hgok.webapp.analysis.AnalysisService;
 import com.hgok.webapp.tool.MemoryData;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
@@ -9,6 +12,7 @@ import oshi.software.os.OperatingSystem;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public class ProcessHandler {
@@ -16,27 +20,27 @@ public class ProcessHandler {
     @Getter
     OperatingSystem os;
 
+    private static final Logger logger = LoggerFactory.getLogger(ProcessHandler.class);
+
     public ProcessHandler() {
     }
 
-    public void startHCGConvert(Path dir) throws IOException {
+    public void startHCGConvert(Path dir) throws IOException, InterruptedException {
+        logger.error("HCG CONVERT STARTED");
         ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "src/main/resources/hcg/jscg_convert2json.py", dir.toString());
         Process convertProcess = convertProcessBuilder.start();
-        String convertResult = new String(convertProcess.getInputStream().readAllBytes());
-        String error = new String(convertProcess.getErrorStream().readAllBytes());
-//        System.err.println(error);
-//        System.out.println(convertResult);
+        logger.info(new String(convertProcess.getInputStream().readAllBytes()));
+        logger.info(new String((convertProcess.getErrorStream().readAllBytes())));
+        logger.error("CONVERT ENDED: " + convertProcess.exitValue());
     }
 
-    public void startHCGCompare(String dir) throws IOException {
-        //todo LOGs
+    public void startHCGCompare(String dir) throws IOException, InterruptedException {
+        logger.error("HCG COMPARE STARTED");
         ProcessBuilder convertProcessBuilder = new ProcessBuilder("python", "src/main/resources/hcg/jscg_compare_json.py", dir, "noentry", "nowrapper");
         Process convertProcess = convertProcessBuilder.start();
-        String result = new String(convertProcess.getInputStream().readAllBytes());
-        String error = new String(convertProcess.getErrorStream().readAllBytes());
-
-//        System.err.println(error);
-//        System.out.println(result);
+        logger.info(new String(convertProcess.getInputStream().readAllBytes()));
+        logger.info(new String((convertProcess.getErrorStream().readAllBytes())));
+        logger.error("COMPARE ENDED: " + convertProcess.waitFor());
     }
 
     public void setOs() {
