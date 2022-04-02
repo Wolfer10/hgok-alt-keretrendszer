@@ -3,15 +3,12 @@ package com.hgok.webapp.util;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +34,10 @@ public class FileHelper {
     }
 
 
-    public static String getRelativeName(String filename){
+    public static String getRelativeNameFromLink(String filename){
+        if (filename.split("/").length < 2){
+            return filename;
+        }
         return filename.split("/")[filename.split("/").length - 2] + "/" + filename.split("/")[filename.split("/").length - 1];
     }
 

@@ -1,5 +1,6 @@
 package com.hgok.webapp.compared;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -20,8 +21,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.checkerframework.checker.units.qual.C;
-import org.hibernate.Hibernate;
 
 @Setter
 @Getter
@@ -118,10 +117,16 @@ public class ComparedAnalysis {
         labels.forEach(label -> {
             NtoMReader ntoMSourceReader = new NtoMReader(label.getSourceFileName());
             NtoMReader ntoMTargetReader = new NtoMReader(label.getTargetFileName());
+
+            if (new File(analysis.getTargetPathName()).isFile()){
+                ntoMSourceReader = new NtoMReader(analysis.getTargetPathName());
+                ntoMTargetReader = new NtoMReader(analysis.getTargetPathName());
+            }
+
             label.getLink().setSourceSnippet(ntoMSourceReader.readFromNToEnd(label.getSourceStartLine()));
             label.getLink().setTargetSnippet(ntoMTargetReader.readFromNToEnd(label.getTargetStartLine()));
-            label.getLink().setSourceRelativeFileName(FileHelper.getRelativeName(label.getSourceFileName()));
-            label.getLink().setTargetRelativeFileName(FileHelper.getRelativeName(label.getTargetFileName()));
+            label.getLink().setSourceRelativeFileName(FileHelper.getRelativeNameFromLink(label.getSourceFileName()));
+            label.getLink().setTargetRelativeFileName(FileHelper.getRelativeNameFromLink(label.getTargetFileName()));
             label.getLink().setSourceStartLine(label.getSourceStartLine());
             label.getLink().setTargetStartLine(label.getTargetStartLine());
         });

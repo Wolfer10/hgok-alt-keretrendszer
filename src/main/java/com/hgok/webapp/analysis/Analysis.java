@@ -10,6 +10,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,6 +27,8 @@ public class Analysis {
     private List<Tool> tools;
 
     private String pathName;
+
+    private String targetPathName;
 
     @OneToOne(mappedBy = "analysis",
             fetch = FetchType.LAZY,

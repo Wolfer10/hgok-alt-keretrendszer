@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class AnalysisService {
@@ -28,24 +28,46 @@ public class AnalysisService {
     public static final String WORKINGPATH = "src/main/resources/static/working-dir/";
     private static final Logger logger = LoggerFactory.getLogger(AnalysisService.class);
 
+    private final AnalysisRepository analysisRepository;
+
+    private final ToolRepository toolRepository;
+
+    private final ToolResultRepository toolResultRepository;
+
+    private final MemoryDataRepository memoryDataRepository;
 
     @Autowired
-    private AnalysisRepository analysisRepository;
-
-    @Autowired
-    private ToolRepository toolRepository;
-
-    @Autowired
-    private ToolResultRepository toolResultRepository;
-
-
-    @Autowired
-    private MemoryDataRepository memoryDataRepository;
-
+    public AnalysisService(AnalysisRepository analysisRepository, ToolRepository toolRepository, ToolResultRepository toolResultRepository, MemoryDataRepository memoryDataRepository) {
+        this.analysisRepository = analysisRepository;
+        this.toolRepository = toolRepository;
+        this.toolResultRepository = toolResultRepository;
+        this.memoryDataRepository = memoryDataRepository;
+    }
 
     public List<Analysis> getOrderedAnalysises(){
-        return StreamSupport.stream(analysisRepository.findAll().spliterator(), false)
+        return analysisRepository.findAllAnalysisWithComparedAndTool().stream()
                 .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
+    }
+
+    public void saveAnalysis(Analysis analysis){
+        analysisRepository.save(analysis);
+    }
+    public Analysis findAnalysisById(Long id){
+        return analysisRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+    }
+
+    public List<Tool> filterTools(String[] toolNames) {
+        List<Tool> filteredTools = new ArrayList<>();
+        List<Tool> tools = toolRepository.findAll();
+        for (String name : toolNames) {
+            filteredTools.addAll(tools.stream().filter(tool -> tool.getName().equals(name)).collect(Collectors.toList()));
+        }
+        return filteredTools;
+    }
+
+    public Analysis initAnalysis(List<Tool> filteredTools, String originalFilename) {
+        return new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()), originalFilename);
     }
 
     @Async("single-thread")
@@ -53,10 +75,10 @@ public class AnalysisService {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
 
-
         Path insertedFilePath = initFileInNewSourceFolder(originFileName);
         Files.write(insertedFilePath, file);
         Path targetPath = getTargetPath(analysis, originFileName, insertedFilePath);
+        analysis.setTargetPathName(targetPath.toString());
         logger.error("Kicsomagolás vége: " + targetPath);
         runEachToolsOnTarget(analysis.getTools(), analysis, targetPath);
         JsonUtil.dumpToolNamesIntoJson(analysis.getTools(), WORKINGPATH);
@@ -67,7 +89,6 @@ public class AnalysisService {
                         Path.of(FileHelper.COMPARED_FOLDER, analysis.getId() + ".json"),
                         analysis));
         analysis.setStatus("kész");
-
         analysisRepository.save(analysis);
     }
 
@@ -106,13 +127,6 @@ public class AnalysisService {
         }
     }
 
-    public List<Tool> filterTools(String[] toolNames) {
-        List<Tool> filteredTools = new ArrayList<>();
-        List<Tool> tools = toolRepository.findAll();
-        for (String name : toolNames) {
-            filteredTools.addAll(tools.stream().filter(tool -> tool.getName().equals(name)).collect(Collectors.toList()));
-        }
-        return filteredTools;
-    }
+
 
 }

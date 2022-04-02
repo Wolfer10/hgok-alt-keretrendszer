@@ -5,11 +5,11 @@ import re
 import glob
 import sys
 
-
 CNT = 1
 EDGEREGEX = re.compile(r".* -> .*")
 FILTER = re.compile(r".*:.*:.* -> .*:.*:.*")
 NODE_POS = re.compile(r".*\.js\[(.*)\]$")
+
 
 def create_schema():
     json_graph = {
@@ -62,10 +62,12 @@ def add_link(j, from_name, to_name, nomod=False):
     if nomod:
         label = from_name + "->" + to_name
     else:
-        label = ':'.join(from_name.split(':')[:-2]) + '@' + (from_name.split(':')[-2] if not from_name.startswith('toplevel') else '[toplevel]') + " -> " + ':'.join(to_name.split(':')[:-2]) + '@' + (to_name.split(':')[-2] if not to_name.startswith('toplevel') else '[toplevel]')
+        label = ':'.join(from_name.split(':')[:-2]) + '@' + (
+            from_name.split(':')[-2] if not from_name.startswith('toplevel') else '[toplevel]') + " -> " + ':'.join(
+            to_name.split(':')[:-2]) + '@' + (
+                    to_name.split(':')[-2] if not to_name.startswith('toplevel') else '[toplevel]')
     if {"target": target_id, "source": source_id, "label": label} not in j.get("links"):
         j.get("links").append({"target": target_id, "source": source_id, "label": label})
-
 
 
 def convert_acg_js(wd):
@@ -87,8 +89,8 @@ def convert_acg_js(wd):
             c = line.split("->")
             if len(c) < 2:
                 continue
-            src = c[0].strip() #.split("(")[1][:-1]
-            tgt = c[1].strip() #.split("(")[1][:-1]
+            src = c[0].strip()  # .split("(")[1][:-1]
+            tgt = c[1].strip()  # .split("(")[1][:-1]
             if src.startswith('toplevel'):
                 add_node(j, '<entry>', '<entry>', True)
                 src = '<entry>'
@@ -101,14 +103,14 @@ def convert_acg_js(wd):
         if not entry:
             # Add an entry node
             add_node(j, '<entry>', '<entry>', True)
-            
+
         with open(os.path.join(os.path.dirname(f), os.path.basename(f).replace(ext, '.json')), 'w') as fp:
             json.dump(j, fp, indent=2)
 
 
 def convert_npm_callgraph_dot(wd):
     edges = set()
-    for f in glob.glob(os.path.join(wd, "*.dot")):
+    for f in glob.glob(os.path.join(wd, "*.cgtxt")):
         j = create_schema()
         with open(f, "r") as fp:
             lines = fp.readlines()
@@ -123,10 +125,11 @@ def convert_npm_callgraph_dot(wd):
                     continue
                 add_node(j, src, src + ":0:0")
                 add_node(j, tgt, tgt + ":0:0")
-                add_link(j, src, tgt, True)
+                add_link(j, src + ":0:0", tgt+ ":0:0", True)
                 edges.add(src + "->" + tgt)
 
-        with open(os.path.join(os.path.dirname(f), "output_" + os.path.basename(f).replace('.dot', '.json')), 'w') as fp:
+        with open(os.path.join(os.path.dirname(f), os.path.basename(f).replace('.cgtxt', '.json')),
+                  'w') as fp:
             json.dump(j, fp, indent=2)
 
 
@@ -147,71 +150,80 @@ def convert_wala(wd):
                 add_node(j, tgt, "GUESS")
                 add_link(j, src, tgt)
         print(j)
-        with open(os.path.join(os.path.dirname(f), 'poshandled_' + os.path.basename(f).replace(ext, '.json')), 'w') as fp:
+        with open(os.path.join(os.path.dirname(f), 'poshandled_' + os.path.basename(f).replace(ext, '.json')),
+                  'w') as fp:
             json.dump(j, fp, indent=2)
 
+
 def convert_tajs(wd):
-  NODEREGEX = re.compile(r".* \[.*\]")
-  nodes = {}
-  for f in glob.glob(os.path.join(wd, "*.dot")):
-    edges = set()
-    j = create_schema()
-    with open(f, "r") as fp:
-      lines = fp.readlines()
-	 
-    for line in lines:
-      if NODEREGEX.match(line) and ("HOST" not in line):
-        node = {
-	      "file": None,
-	      "line": None,
-	      "column": None
-	    }
-        matches = re.compile(r"(?P<alias>f\d+).*label=\"(?P<label>.*)\"")
-        search = matches.search(line)
-        alias = search.group('alias')
-        
-        label = search.group('label')
-        if label == "<main>":
-          node["file"] = "toplevel"
-          node["line"] = '1'
-          node["column"] = '1'
-          nodes[alias] = node
-          continue
-        c = label.split("\\n")
-        s = c[1].split(":")
-        node["line"] = s[1]
-        node["column"] = s[2]
-		
-        detect_function = re.compile(r".*\((?P<filename>.*)\).*")
-        search_function = detect_function.search(s[0])
-        if search_function != None:
-          node["file"] = os.path.basename(search_function.group('filename'))
-        else:
-          node["file"] = os.path.basename(s[0])
-        nodes[alias] = node
-        continue
+    NODEREGEX = re.compile(r".* \[.*\]")
+    nodes = {}
+    for f in glob.glob(os.path.join(wd, "*.dot")):
+        edges = set()
+        j = create_schema()
+        with open(f, "r") as fp:
+            lines = fp.readlines()
 
-    for line in lines:
-      if EDGEREGEX.match(line):
-        line = line.strip()
-        line = line.replace('"', '')
-        c = line.split("->")
-        src = c[0].strip()
-        tgt = c[1].strip()
-        if src + "->" + tgt in edges:
-            continue
-        if src not in nodes.keys() or tgt not in nodes.keys():
-            continue
-        node_src = nodes.get(src)
-        add_node(j, node_src.get("file")+"@"+node_src.get("line") if node_src.get("file") != "toplevel" else "[toplevel]", node_src.get("file") + ":"+node_src.get("line")+":"+node_src.get("column"))
-        node_tgt = nodes.get(tgt)
-        add_node(j, node_tgt.get("file")+"@"+node_tgt.get("line") if node_tgt.get("file") != "toplevel" else "[toplevel]", node_tgt.get("file") + ":"+node_tgt.get("line")+":"+node_tgt.get("column"))
-        add_link(j, node_src.get("file") + ":" + node_src.get("line") + ":" + node_src.get("column"), node_tgt.get("file") + ":" + node_tgt.get("line") + ":" + node_tgt.get("column"), False)
-        edges.add(src + "->" + tgt)
+        for line in lines:
+            if NODEREGEX.match(line) and ("HOST" not in line):
+                node = {
+                    "file": None,
+                    "line": None,
+                    "column": None
+                }
+                matches = re.compile(r"(?P<alias>f\d+).*label=\"(?P<label>.*)\"")
+                search = matches.search(line)
+                alias = search.group('alias')
 
-    with open(os.path.join(os.path.dirname(f), "output_"+os.path.basename(f).replace('.dot', '.json')), 'w') as fp:
-      json.dump(j, fp, indent=2)    
-    
+                label = search.group('label')
+                if label == "<main>":
+                    node["file"] = "toplevel"
+                    node["line"] = '1'
+                    node["column"] = '1'
+                    nodes[alias] = node
+                    continue
+                c = label.split("\\n")
+                s = c[1].split(":")
+                node["line"] = s[1]
+                node["column"] = s[2]
+
+                detect_function = re.compile(r".*\((?P<filename>.*)\).*")
+                search_function = detect_function.search(s[0])
+                if search_function != None:
+                    node["file"] = os.path.basename(search_function.group('filename'))
+                else:
+                    node["file"] = os.path.basename(s[0])
+                nodes[alias] = node
+                continue
+
+        for line in lines:
+            if EDGEREGEX.match(line):
+                line = line.strip()
+                line = line.replace('"', '')
+                c = line.split("->")
+                src = c[0].strip()
+                tgt = c[1].strip()
+                if src + "->" + tgt in edges:
+                    continue
+                if src not in nodes.keys() or tgt not in nodes.keys():
+                    continue
+                node_src = nodes.get(src)
+                add_node(j, node_src.get("file") + "@" + node_src.get("line") if node_src.get(
+                    "file") != "toplevel" else "[toplevel]",
+                         node_src.get("file") + ":" + node_src.get("line") + ":" + node_src.get("column"))
+                node_tgt = nodes.get(tgt)
+                add_node(j, node_tgt.get("file") + "@" + node_tgt.get("line") if node_tgt.get(
+                    "file") != "toplevel" else "[toplevel]",
+                         node_tgt.get("file") + ":" + node_tgt.get("line") + ":" + node_tgt.get("column"))
+                add_link(j, node_src.get("file") + ":" + node_src.get("line") + ":" + node_src.get("column"),
+                         node_tgt.get("file") + ":" + node_tgt.get("line") + ":" + node_tgt.get("column"), False)
+                edges.add(src + "->" + tgt)
+
+        with open(os.path.join(os.path.dirname(f), "output_" + os.path.basename(f).replace('.dot', '.json')),
+                  'w') as fp:
+            json.dump(j, fp, indent=2)
+
+
 def stats_for_json(wd):
     stats = []
     for f in glob.glob(os.path.join(wd, "*.json")):
@@ -224,13 +236,23 @@ def stats_for_json(wd):
             for stat in stats:
                 fw.write("%s;%d;%d\n" % (stat['file'], stat['nodes'], stat['links']))
 
+
 def main(wd):
-    convert_acg_js(wd)
+    dir_name = os.path.basename(wd).lower()
+
+    if "acg" in dir_name:
+        convert_acg_js(wd)
+        print("acg futott le")
+    elif "npm" in dir_name:
+        convert_npm_callgraph_dot(wd)
+        print("npm futott le")
+    else:
+        convert_acg_js(wd)
 
 if __name__ == '__main__':
     # work_dir = r'd:\research\papers\js-cg-static-dynamic-compare\appendix\source\acg'
     # Convert ACG.js results
-    #convert_acg_js(work_dir)
+    # convert_acg_js(work_dir)
     main(sys.argv[1])
 
     # Convert npm callgraph results

@@ -12,6 +12,7 @@ public class LinkIterator<T> implements Iterator<T> {
 
     private final List<T> list;
     private final int size;
+    @Setter
     private int currentPointer = 0;
     private int stepSize = 1;
 

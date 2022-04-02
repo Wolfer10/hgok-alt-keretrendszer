@@ -65,7 +65,7 @@ public class ToolResult {
         Timestamp validationStart = new Timestamp(System.currentTimeMillis());
         logger.error("Tool futásának kezdete:");
         Process rawAnalysis = toolProcessBuilder.start();
-        memoryData = processHandler.calculateMemoryDataFromProcess(rawAnalysis).get();
+        //memoryData = processHandler.calculateMemoryDataFromProcess(rawAnalysis).get();
         result = rawAnalysis.getInputStream().readAllBytes();
         logger.error(new String(rawAnalysis.getErrorStream().readAllBytes()));
         int exitValue = rawAnalysis.waitFor();

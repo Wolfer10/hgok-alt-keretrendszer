@@ -2,6 +2,7 @@ package com.hgok.webapp.edgeValidator;
 
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
+import com.hgok.webapp.analysis.AnalysisService;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.compared.LinkRepository;
 import com.hgok.webapp.compared.LinkState;
@@ -17,7 +18,7 @@ import java.util.List;
 public class LinkValidatorController {
 
     @Autowired
-    private AnalysisRepository analysisRepository;
+    private AnalysisService analysisService;
 
     @Autowired
     private LinkRepository linkRepository;
@@ -53,7 +54,7 @@ public class LinkValidatorController {
     public String end() {
         analysis.getComparedAnalysis().setLinks(linkIterator.getList());
         analysis.setStatus("validated");
-        analysisRepository.save(analysis);
+        analysisService.saveAnalysis(analysis);
         return "redirect:/listAnalysis";
     }
 
@@ -63,7 +64,7 @@ public class LinkValidatorController {
         linkStateChooser(validation);
     }
 
-    private void linkStateChooser(String validation) {
+    public void linkStateChooser(String validation) {
         switch (validation) {
             case "unchecked":
                 linkIterator.current().setState(LinkState.UNCHECKED);
@@ -119,8 +120,7 @@ public class LinkValidatorController {
     }
 
     private Analysis init_analysis(@PathVariable("id") Long id) {
-        Analysis analysis = analysisRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+        Analysis analysis = analysisService.findAnalysisById(id);
         Hibernate.initialize(analysis.getComparedAnalysis().getLinks());
         return analysis;
     }

@@ -33,10 +33,16 @@ class AnalysisRepositoryTest {
 
     @BeforeEach
     public void init() {
-       analysis = analysisRepository.findById(1L).orElseThrow(
-               () -> new IllegalArgumentException("Invalid user Id"));
+//       analysis = analysisRepository.findById(1L).orElseThrow(
+//               () -> new IllegalArgumentException("Invalid user Id"));
 
     }
+
+    @Test
+    public void findall(){
+        assertThat(analysisRepository.findAllAnalysisWithComparedAndTool()).isNotEmpty();
+    }
+
     @Test
     public void testFindById(){
         ComparedAnalysis comparedAnalysis = analysis.getComparedAnalysis();

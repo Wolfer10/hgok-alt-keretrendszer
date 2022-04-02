@@ -2,6 +2,8 @@ package com.hgok.webapp.compared;
 
 import com.hgok.webapp.analysis.Analysis;
 import com.hgok.webapp.analysis.AnalysisRepository;
+import com.hgok.webapp.analysis.AnalysisService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ComparedAnalysisController {
     @Autowired
-    private AnalysisRepository analysisRepository;
+    private AnalysisService analysisService;
 
     private ComparedAnalysisService comparedAnalysisService;
 
@@ -29,7 +31,7 @@ public class ComparedAnalysisController {
     public String showStats(@PathVariable("analysisId") Long id, Model model) {
         initAnalysis(id);
         model.addAttribute("compared", actualAnalysis.getComparedAnalysis());
-        analysisRepository.save(actualAnalysis);
+        analysisService.saveAnalysis(actualAnalysis);
         return "validated-analysis";
     }
 
@@ -42,8 +44,7 @@ public class ComparedAnalysisController {
     private void initAnalysis(Long id) {
         if(actualAnalysis == null || !analysisId.equals(id)){
             analysisId = id;
-            actualAnalysis = analysisRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+            actualAnalysis = analysisService.findAnalysisById(id);
             actualAnalysis.getComparedAnalysis().getToolMetrics();
             comparedAnalysisService.comparedAnalysis = actualAnalysis.getComparedAnalysis();
             comparedAnalysisService.initToolResults();

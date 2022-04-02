@@ -18,4 +18,8 @@ public interface ToolRepository extends JpaRepository<Tool, Long> {
             nativeQuery=true)
     List<Tool> getToolsFromLanguage(@Param("ln") String language);
 
+    @Query(value = "SELECT * FROM Tool t WHERE t.id = :id",
+            nativeQuery=true)
+    List<Tool> getToolsByAnalysisId(@Param("id") Long id);
+
 }
