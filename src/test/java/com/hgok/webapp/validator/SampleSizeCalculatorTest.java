@@ -1,9 +1,8 @@
-package com.hgok.webapp.edgeValidator;
+package com.hgok.webapp.validator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SampleSizeCalculatorTest {

@@ -1,4 +1,4 @@
-package com.hgok.webapp.edgeValidator;
+package com.hgok.webapp.validator;
 
 import lombok.Getter;
 import lombok.Setter;

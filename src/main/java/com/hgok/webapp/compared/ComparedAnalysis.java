@@ -118,7 +118,7 @@ public class ComparedAnalysis {
             NtoMReader ntoMSourceReader = new NtoMReader(label.getSourceFileName());
             NtoMReader ntoMTargetReader = new NtoMReader(label.getTargetFileName());
 
-            if (new File(analysis.getTargetPathName()).isFile()){
+            if (analysis.getTargetPathName() != null && new File(analysis.getTargetPathName()).isFile()){
                 ntoMSourceReader = new NtoMReader(analysis.getTargetPathName());
                 ntoMTargetReader = new NtoMReader(analysis.getTargetPathName());
             }
@@ -140,7 +140,7 @@ public class ComparedAnalysis {
         return metricContainers;
     }
 
-    public MetricContainer initMetricContainer(Tool tool) {
+    private MetricContainer initMetricContainer(Tool tool) {
         List<Link> acceptedLinks = validatedLinks.stream().filter(link -> link.getState() == LinkState.ACCEPTED && new HashSet<>(link.getFoundBy()).contains(tool.getName())).collect(Collectors.toList());
         int all = validatedLinks.stream().filter(link ->  new HashSet<>(link.getFoundBy()).contains(tool.getName())).toArray().length;
         return new MetricContainer(acceptedLinks.size(), all, tool);

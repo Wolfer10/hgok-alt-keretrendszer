@@ -13,8 +13,7 @@ public class CompareTest {
 
     public static String COMPARED_DIR =  "src/test/java/com/hgok/webapp/hcg/testdir/x-compared";
 
-   @Test
-   @Deprecated
+
     public void testHCGCompareCreateFile() throws IOException, InterruptedException {
         new ProcessHandler().startHCGCompare(ConvertTest.HCG_TESTDIR);
         Assertions.assertTrue(Path.of(COMPARED_DIR).toFile().exists());

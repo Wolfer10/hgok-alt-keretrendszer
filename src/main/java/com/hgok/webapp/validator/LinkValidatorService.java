@@ -1,24 +1,24 @@
-package com.hgok.webapp.edgeValidator;
+package com.hgok.webapp.validator;
 
 import com.hgok.webapp.analysis.Analysis;
-import com.hgok.webapp.analysis.AnalysisRepository;
 import com.hgok.webapp.analysis.AnalysisService;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.compared.LinkRepository;
 import com.hgok.webapp.compared.LinkState;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@Controller
-public class LinkValidatorController {
+@Service
+public class LinkValidatorService {
+
 
     @Autowired
-    private AnalysisService analysisService;
+    AnalysisService analysisService;
 
     @Autowired
     private LinkRepository linkRepository;
@@ -27,41 +27,8 @@ public class LinkValidatorController {
     Analysis analysis;
     Long analysisId;
 
-    @GetMapping("/validate/{analysisId}/currlink/{id}")
-    public String showCodeSnippetsToValidate(@PathVariable("analysisId") Long id, Model model) {
-        init(id, model);
-        model.addAttribute("accepted", LinkState.ACCEPTED);
-        model.addAttribute("denied",LinkState.DENIED);
-        model.addAttribute("unchecked",LinkState.UNCHECKED);
-        return "validate-analysis";
-    }
-
-    @GetMapping("/validate/{analysisId}/nextlink/{id}")
-    public String stepForward(Model model) {
-        Link next = linkIterator.next();
-        model.addAttribute("foundBy", linkRepository.getFoundBysByLink(next.getId()));
-        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), next.getId());
-    }
-
-    @GetMapping("/validate/{analysisId}/prevlink/{id}")
-    public String stepBackwards(Model model) {
-        Link previous = linkIterator.previous();
-        model.addAttribute("foundBy", linkRepository.getFoundBysByLink(previous.getId()));
-        return String.format("redirect:/validate/%s/currlink/%s", analysis.getId(), previous.getId());
-    }
-
-    @PostMapping("/validate/end")
-    public String end() {
-        analysis.getComparedAnalysis().setLinks(linkIterator.getList());
-        analysis.setStatus("validated");
-        analysisService.saveAnalysis(analysis);
-        return "redirect:/listAnalysis";
-    }
-
-    @PostMapping("/validateLink")
-    @ResponseBody
-    public void validateLink(@RequestParam(name = "valid_link") String validation){
-        linkStateChooser(validation);
+    public List<String> getFoundBysByLink(Long id){
+        return linkRepository.getFoundBysByLink(id);
     }
 
     public void linkStateChooser(String validation) {
@@ -80,20 +47,19 @@ public class LinkValidatorController {
         }
     }
 
-
     /**
      * analysis betöltése id alapján
      * iterator inicializálása az analysis linkjeivel
      * a modelnek átadjuk az első linket
      */
-    private void init(@PathVariable("id") Long id, Model model) {
+    public void init(@PathVariable("id") Long id, Model model) {
         if(analysis == null || !analysisId.equals(id)){
             analysisId = id;
             analysis = init_analysis(id);
             init_iterator();
         }
         model.addAttribute("currentLink", linkIterator.current());
-        model.addAttribute("foundBy", linkRepository.getFoundBysByLink(linkIterator.current().getId()));
+        model.addAttribute("foundBy", getFoundBysByLink(linkIterator.current().getId()));
         init_model(model);
     }
 
@@ -124,4 +90,5 @@ public class LinkValidatorController {
         Hibernate.initialize(analysis.getComparedAnalysis().getLinks());
         return analysis;
     }
+
 }

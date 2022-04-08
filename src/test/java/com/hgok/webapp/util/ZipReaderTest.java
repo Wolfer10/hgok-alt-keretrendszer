@@ -45,7 +45,7 @@ class ZipReaderTest {
         assertThat(path2).exists();
     }
 
-    @Test
+
     public void testUnZipMathJs() throws IOException {
         ZipReader.unzip(Path.of(MATH2), Path.of(DEST_FOLDER4));
 //        Path path2 = Path.of(DEST_FOLDER4, "unformatted");

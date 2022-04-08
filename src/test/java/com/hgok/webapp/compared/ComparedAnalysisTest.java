@@ -27,15 +27,12 @@ class ComparedAnalysisTest {
     @Test
     void initComparedAnalysis() {
         Analysis analysis = new Analysis();
+        analysis.setTargetPathName(Path.of(TEST_JSON).toString());
         ComparedAnalysis comparedAnalysis2 = ComparedAnalysis.initComparedAnalysis(Path.of(TEST_JSON), analysis);
         assertThat(comparedAnalysis2.getAnalysis()).isEqualTo(analysis);
         assertThat(comparedAnalysis2.getLinks()).hasSize(1);
         assertThat(comparedAnalysis2.getLinks().get(0).getLabel()).isEqualTo(EXPECTED);
         assertThat(comparedAnalysis2.getFileName()).isEqualTo("TestFile.json");
-    }
-
-    @Test
-    void setLinkSourceAndTarget() {
     }
 
     @Test

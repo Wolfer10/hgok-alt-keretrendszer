@@ -3,6 +3,7 @@ package com.hgok.webapp.tool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,4 +26,23 @@ public class ToolService {
     public List<String> groupToolLanguages() {
         return toolRepository.GroupToolLanguages();
     }
+
+    public void save(Tool tool){
+        toolRepository.save(tool);
+    }
+
+    public Tool findById(Long id){
+       return toolRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid tool Id:" + id));
+    }
+
+    public List<Tool> findAll(){
+        return toolRepository.findAll();
+    }
+
+    public void delete(Tool tool){
+        toolRepository.delete(tool);
+    }
+
+
 }

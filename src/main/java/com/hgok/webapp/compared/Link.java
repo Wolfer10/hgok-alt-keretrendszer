@@ -42,7 +42,7 @@ public class Link {
     @SerializedName("label")
     @Expose
     @Lob
-        private String label;
+    private String label;
     @SerializedName("foundBy")
     @Expose
     @ElementCollection
@@ -51,15 +51,15 @@ public class Link {
     @Lob
     private String targetSnippet;
 
+    @Lob
+    private String sourceSnippet;
+
     private String targetRelativeFileName;
     private String sourceRelativeFileName;
 
     private int sourceStartLine;
     private int targetStartLine;
 
-
-    @Lob
-    private String sourceSnippet;
 
     @Enumerated(value = EnumType.STRING)
     private LinkState state = LinkState.UNCHECKED;

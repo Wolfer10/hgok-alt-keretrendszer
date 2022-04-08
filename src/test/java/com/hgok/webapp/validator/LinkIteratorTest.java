@@ -1,4 +1,4 @@
-package com.hgok.webapp.edgeValidator;
+package com.hgok.webapp.validator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

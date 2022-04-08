@@ -42,9 +42,9 @@ public class AnalysisController {
     String startAnalysis(@RequestParam(value = "name") String[] names, @RequestParam(value = "file") MultipartFile analysisFile) throws IOException, InterruptedException, ExecutionException {
         List<Tool> filteredTools = analysisService.filterTools(names);
         String originalFilename = analysisFile.getOriginalFilename();
-        Analysis analysis = analysisService.initAnalysis(filteredTools, originalFilename);
-        analysisService.saveAnalysis(analysis);
-        analysisService.startAnalysis(analysis, IOUtils.toByteArray((analysisFile.getInputStream())), originalFilename);
+        analysisService.setAnalysis(filteredTools, originalFilename);
+        analysisService.saveAnalysis();
+        analysisService.startAnalysis(IOUtils.toByteArray((analysisFile.getInputStream())), originalFilename);
 
         return "redirect:/listAnalysis";
     }

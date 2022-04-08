@@ -6,6 +6,7 @@ import com.hgok.webapp.tool.*;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
 import com.hgok.webapp.util.ZipReader;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ public class AnalysisService {
 
     private final MemoryDataRepository memoryDataRepository;
 
+    private Analysis analysis;
+
     @Autowired
     public AnalysisService(AnalysisRepository analysisRepository, ToolRepository toolRepository, ToolResultRepository toolResultRepository, MemoryDataRepository memoryDataRepository) {
         this.analysisRepository = analysisRepository;
@@ -44,17 +47,34 @@ public class AnalysisService {
         this.memoryDataRepository = memoryDataRepository;
     }
 
-    public List<Analysis> getOrderedAnalysises(){
-        return analysisRepository.findAllAnalysisWithComparedAndTool().stream()
-                .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
-    }
-
-    public void saveAnalysis(Analysis analysis){
+    @Async("single-thread")
+    public void startAnalysis(byte[] file, String originFileName) {
+        System.out.println("Execute method asynchronously. "
+                + Thread.currentThread().getName());
+        try{
+            Path insertedFilePath = initFileInNewSourceFolder(originFileName);
+            Files.write(insertedFilePath, file);
+            Path targetPath = getTargetPath(originFileName, insertedFilePath);
+            analysis.setTargetPathName(targetPath.toString());
+            logger.error("Kicsomagolás vége: " + targetPath);
+            runEachToolsOnTarget(analysis.getTools(), targetPath);
+            JsonUtil.dumpToolNamesIntoJson(analysis.getTools(), WORKINGPATH);
+            ProcessHandler processHandler = new ProcessHandler();
+            processHandler.startHCGCompare(WORKINGPATH);
+            analysis.setComparedAnalysis(
+                    ComparedAnalysis.initComparedAnalysis(
+                            Path.of(FileHelper.COMPARED_FOLDER, analysis.getId() + ".json"),
+                            analysis));
+            analysis.setStatus("kész");
+        } catch (IOException | InterruptedException | ExecutionException ex){
+            analysis.setStatus("hiba történt");
+            logger.error("HIBA:", ex);
+        } catch (Exception ex){
+            analysis.setStatus("végzetes hiba történt");
+            logger.error("HIBA:", ex);
+        }
         analysisRepository.save(analysis);
-    }
-    public Analysis findAnalysisById(Long id){
-        return analysisRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+
     }
 
     public List<Tool> filterTools(String[] toolNames) {
@@ -66,33 +86,29 @@ public class AnalysisService {
         return filteredTools;
     }
 
-    public Analysis initAnalysis(List<Tool> filteredTools, String originalFilename) {
-        return new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()), originalFilename);
+    public List<Analysis> getOrderedAnalysises(){
+        return analysisRepository.findAllAnalysisWithComparedAndTool().stream()
+                .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
     }
 
-    @Async("single-thread")
-    public void startAnalysis(Analysis analysis, byte[] file, String originFileName) throws IOException, InterruptedException, ExecutionException {
-        System.out.println("Execute method asynchronously. "
-                + Thread.currentThread().getName());
-
-        Path insertedFilePath = initFileInNewSourceFolder(originFileName);
-        Files.write(insertedFilePath, file);
-        Path targetPath = getTargetPath(analysis, originFileName, insertedFilePath);
-        analysis.setTargetPathName(targetPath.toString());
-        logger.error("Kicsomagolás vége: " + targetPath);
-        runEachToolsOnTarget(analysis.getTools(), analysis, targetPath);
-        JsonUtil.dumpToolNamesIntoJson(analysis.getTools(), WORKINGPATH);
-        ProcessHandler processHandler = new ProcessHandler();
-        processHandler.startHCGCompare(WORKINGPATH);
-        analysis.setComparedAnalysis(
-                ComparedAnalysis.initComparedAnalysis(
-                        Path.of(FileHelper.COMPARED_FOLDER, analysis.getId() + ".json"),
-                        analysis));
-        analysis.setStatus("kész");
+    public void saveAnalysis(){
         analysisRepository.save(analysis);
     }
 
-    private Path getTargetPath(Analysis analysis, String originFileName, Path insertedFilePath) throws IOException {
+    public void saveAnalysis(Analysis analysis){
+        analysisRepository.save(analysis);
+    }
+
+    public Analysis findAnalysisById(Long id){
+        return analysisRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid analysis Id:" + id));
+    }
+
+    public void setAnalysis(List<Tool> filteredTools, String originalFilename) {
+        analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()), originalFilename);
+    }
+
+    private Path getTargetPath(String originFileName, Path insertedFilePath) throws IOException {
         FileHelper fileHelper = new FileHelper();
         Path targetPath = fileHelper.createDirectoryFromName(WORKINGPATH, originFileName.split("\\.")[0] + analysis.getId());
         if (originFileName.endsWith(".zip")){
@@ -112,7 +128,7 @@ public class AnalysisService {
         return fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), Path.of(FileHelper.SOURCE_FOLDER).getFileName().toString(), originFileName, "");
     }
 
-    private void runEachToolsOnTarget(List<Tool> tools, Analysis analysis, Path path) throws IOException, ExecutionException, InterruptedException {
+    private void runEachToolsOnTarget(List<Tool> tools, Path path) throws IOException, ExecutionException, InterruptedException {
         FileHelper fileHelper = new FileHelper();
         for(Tool filteredTool : tools) {
             fileHelper.removeDirByName(WORKINGPATH, filteredTool.getName());
