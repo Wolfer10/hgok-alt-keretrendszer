@@ -2,27 +2,35 @@ package com.hgok.webapp.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.*;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class NtoMReader {
 
     String fileName;
 
-    public static String readFromNToNLine(BufferedReader br, int from, int to) throws IOException {
+    public String getStringNthLine(String source, int line ) {
+        Pattern NEWLINE = Pattern.compile("\\R");
+        return  NEWLINE.split(source)[line - 1];
+    }
+
+    public  String readFromNLineToMCharacter(BufferedReader br, int from, int to) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         skipNLine(br, from);
-        for (int i = from; i < to; i++) {
-            stringBuilder.append(br.readLine());
+        for (int i = from; i <= to; i++) {
+            stringBuilder.append((char) br.read());
         }
         return stringBuilder.toString();
     }
 
-    public String readFromNToEnd(int from) {
+    public String readFromNtoEnd(int from) {
         StringBuilder stringBuilder = new StringBuilder();
         try(BufferedReader br = (BufferedReader) openFile()){
             skipNLine(br, from - 1);

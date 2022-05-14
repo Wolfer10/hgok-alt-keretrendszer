@@ -17,6 +17,10 @@ h2, h3{
     /*margin-left: 10px;*/
 }
 
+.highlight{
+    background-color: #00b0e8;
+}
+
 .grid-block {
     display: grid;
     grid-template-columns: 40% 40% 20%;

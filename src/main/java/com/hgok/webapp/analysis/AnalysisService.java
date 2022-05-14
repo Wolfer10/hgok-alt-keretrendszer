@@ -6,7 +6,6 @@ import com.hgok.webapp.tool.*;
 import com.hgok.webapp.util.FileHelper;
 import com.hgok.webapp.util.JsonUtil;
 import com.hgok.webapp.util.ZipReader;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ public class AnalysisService {
 
     @Async("single-thread")
     public void startAnalysis(byte[] file, String originFileName) {
-        System.out.println("Execute method asynchronously. "
+        logger.info("Execute method asynchronously. "
                 + Thread.currentThread().getName());
         try{
             Path insertedFilePath = initFileInNewSourceFolder(originFileName);
@@ -66,6 +65,7 @@ public class AnalysisService {
                             Path.of(FileHelper.COMPARED_FOLDER, analysis.getId() + ".json"),
                             analysis));
             analysis.setStatus("kész");
+
         } catch (IOException | InterruptedException | ExecutionException ex){
             analysis.setStatus("hiba történt");
             logger.error("HIBA:", ex);
@@ -74,7 +74,6 @@ public class AnalysisService {
             logger.error("HIBA:", ex);
         }
         analysisRepository.save(analysis);
-
     }
 
     public List<Tool> filterTools(String[] toolNames) {
@@ -87,7 +86,7 @@ public class AnalysisService {
     }
 
     public List<Analysis> getOrderedAnalysises(){
-        return analysisRepository.findAllAnalysisWithComparedAndTool().stream()
+        return analysisRepository.findAllAnalysisWithCompared().stream()
                 .sorted(Comparator.comparing(Analysis::getTimestamp).reversed()).collect(Collectors.toList());
     }
 
@@ -106,6 +105,7 @@ public class AnalysisService {
 
     public void setAnalysis(List<Tool> filteredTools, String originalFilename) {
         analysis = new Analysis(filteredTools, "folyamatban", new Timestamp(System.currentTimeMillis()), originalFilename);
+        analysis.setComparedAnalysis(new ComparedAnalysis(analysis, "-"));
     }
 
     private Path getTargetPath(String originFileName, Path insertedFilePath) throws IOException {
@@ -134,8 +134,8 @@ public class AnalysisService {
             fileHelper.removeDirByName(WORKINGPATH, filteredTool.getName());
             Path pathOfResult = fileHelper.createDirAndInsertFile(Path.of(WORKINGPATH), filteredTool.getName(), String.valueOf(analysis.getId()), ".cgtxt");
             ToolResult toolResult = new ToolResult(filteredTool, path, analysis);
-            toolResult.setMemoryData(toolResult.getMemoryData() != null ? toolResult.getMemoryData() : new MemoryData());
-            memoryDataRepository.save(toolResult.getMemoryData());
+            //toolResult.setMemoryData(toolResult.getMemoryData() != null ? toolResult.getMemoryData() : new MemoryData());
+            //memoryDataRepository.save(toolResult.getMemoryData());
             toolResultRepository.save(toolResult);
             Files.write(pathOfResult, toolResult.getResult());
             ProcessHandler processHandler = new ProcessHandler();

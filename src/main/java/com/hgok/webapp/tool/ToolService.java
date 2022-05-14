@@ -3,7 +3,6 @@ package com.hgok.webapp.tool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,7 @@ public class ToolService {
     }
 
     public List<String> groupToolLanguages() {
-        return toolRepository.GroupToolLanguages();
+        return toolRepository.groupToolLanguages();
     }
 
     public void save(Tool tool){

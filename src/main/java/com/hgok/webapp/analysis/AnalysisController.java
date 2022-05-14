@@ -44,8 +44,8 @@ public class AnalysisController {
         String originalFilename = analysisFile.getOriginalFilename();
         analysisService.setAnalysis(filteredTools, originalFilename);
         analysisService.saveAnalysis();
+        //analysisService.getOrderedAnalysises().forEach(a -> System.out.println(a.getId() + " " + a.getStatus()));
         analysisService.startAnalysis(IOUtils.toByteArray((analysisFile.getInputStream())), originalFilename);
-
         return "redirect:/listAnalysis";
     }
 

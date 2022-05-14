@@ -1,6 +1,6 @@
 package com.hgok.webapp.hcg;
 
-import com.hgok.webapp.analysis.AnalysisService;
+
 import com.hgok.webapp.tool.MemoryData;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -12,7 +12,6 @@ import oshi.software.os.OperatingSystem;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public class ProcessHandler {
@@ -23,6 +22,7 @@ public class ProcessHandler {
     private static final Logger logger = LoggerFactory.getLogger(ProcessHandler.class);
 
     public ProcessHandler() {
+        setOs();
     }
 
     public void startHCGConvert(Path dir) throws IOException, InterruptedException {
@@ -31,7 +31,7 @@ public class ProcessHandler {
         Process convertProcess = convertProcessBuilder.start();
         logger.info(new String(convertProcess.getInputStream().readAllBytes()));
         logger.info(new String((convertProcess.getErrorStream().readAllBytes())));
-        logger.error("CONVERT ENDED: " + convertProcess.exitValue());
+        logger.error("CONVERT ENDED: " + convertProcess.waitFor());
     }
 
     public void startHCGCompare(String dir) throws IOException, InterruptedException {
@@ -67,6 +67,7 @@ public class ProcessHandler {
     }
 
     public long memoryUtilizationPerProcess(long pid) {
+
         OSProcess osProcess = os.getProcess((int) pid);
         if (osProcess == null){
            return 0;

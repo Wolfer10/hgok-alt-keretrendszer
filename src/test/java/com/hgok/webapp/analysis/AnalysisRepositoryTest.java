@@ -40,7 +40,7 @@ class AnalysisRepositoryTest {
 
     @Test
     public void findall(){
-        assertThat(analysisRepository.findAllAnalysisWithComparedAndTool()).isNotEmpty();
+        assertThat(analysisRepository.findAllAnalysisWithCompared()).isNotEmpty();
     }
 
     @Test

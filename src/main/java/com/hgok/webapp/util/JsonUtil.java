@@ -31,12 +31,12 @@ public class JsonUtil {
      * Gson segítségével átkonvertálja convertedObject-é
      */
     public static ComparedAnalysis getComparedToolsFromJson(String filePath) throws FileNotFoundException {
-        String content = new Scanner(new File(filePath))
-                .useDelimiter("\\Z").next();
-
-        Gson g = new Gson();
-        JsonObject convertedObject = new Gson().fromJson(content, JsonObject.class);
-        return g.fromJson(convertedObject, ComparedAnalysis.class);
+        try(Scanner scanner = new Scanner(new File(filePath))) {
+            String content = scanner.useDelimiter("\\Z").next();
+            Gson g = new Gson();
+            JsonObject convertedObject = new Gson().fromJson(content, JsonObject.class);
+            return g.fromJson(convertedObject, ComparedAnalysis.class);
+        }
     }
 
     public static <T> String mapToJson(Map<T, T> map){

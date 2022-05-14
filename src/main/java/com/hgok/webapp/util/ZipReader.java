@@ -15,9 +15,9 @@ public class ZipReader {
     public static final int BUFFER_SIZE = 4096;
 
     public static void unzip(Path source, Path target) throws IOException {
-        new ZipFile(source.toFile())
-                .extractAll(target.toString());
-
+        try(ZipFile zipFile = new ZipFile(source.toFile())){
+            zipFile.extractAll(String.valueOf(target));
+        }
     }
 
 }

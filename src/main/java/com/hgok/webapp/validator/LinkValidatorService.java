@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 @Service
@@ -44,6 +45,8 @@ public class LinkValidatorService {
                 linkIterator.current().setState(LinkState.DENIED);
                 analysis.getComparedAnalysis().addToValidatedLinks(linkIterator.current());
                 break;
+            default:
+                throw new IllegalArgumentException("Hibás validiációs értél");
         }
     }
 

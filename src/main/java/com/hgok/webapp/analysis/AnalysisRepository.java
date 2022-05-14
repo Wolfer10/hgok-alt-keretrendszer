@@ -14,7 +14,7 @@ public interface AnalysisRepository extends CrudRepository<Analysis, Long> {
     Analysis findAnalysisById(Long Id);
 
     @Query(value = "SELECT a FROM Analysis a join fetch a.comparedAnalysis c")
-    List<Analysis> findAllAnalysisWithComparedAndTool();
+    List<Analysis> findAllAnalysisWithCompared();
 
 
 }

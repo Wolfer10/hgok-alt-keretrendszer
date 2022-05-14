@@ -77,7 +77,6 @@ public class ToolResult {
         }
         logger.info("Tool futásának Vége");
 
-
         validationLength = (validationEnd.getTime() - validationStart.getTime());
 
         return rawAnalysis;

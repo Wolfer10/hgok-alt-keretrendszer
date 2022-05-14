@@ -5,7 +5,10 @@ import com.hgok.webapp.analysis.AnalysisService;
 import com.hgok.webapp.compared.Link;
 import com.hgok.webapp.compared.LinkRepository;
 import com.hgok.webapp.compared.LinkState;
+import org.apache.commons.logging.Log;
 import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +19,7 @@ import java.util.List;
 @Controller
 public class LinkValidatorController {
 
+    private static final Logger log = LoggerFactory.getLogger(LinkValidatorController.class);
 
     @Autowired
     private LinkValidatorService linkValidatorService;
@@ -54,7 +58,12 @@ public class LinkValidatorController {
     @PostMapping("/validateLink")
     @ResponseBody
     public void validateLink(@RequestParam(name = "valid_link") String validation){
-        linkValidatorService.linkStateChooser(validation);
+        try {
+            linkValidatorService.linkStateChooser(validation);
+        } catch (IllegalArgumentException e){
+            //todo hiba page
+            log.error("Hibás argumentum validation", e);
+        }
     }
 
 }

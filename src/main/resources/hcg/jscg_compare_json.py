@@ -15,12 +15,7 @@ def create_schema():
     return copy.deepcopy(json_graph)
 
 
-dir_tool_map = {
-    # ez bele lett hackelve
-    # os.path.join(sys.argv[1], 'js-callgraph-DEMAND'): 'acg-demand',
-    # os.path.join(sys.argv[1], 'js-callgraph-ONESHOT'): 'acg-oneshot',
-    # os.path.join(sys.argv[1], 'dyn-v8'): 'dyn-v8'
-}
+dir_tool_map = {}
 
 out_dir = os.path.join(sys.argv[1], 'x-compared')
 data_container = {}
@@ -109,7 +104,8 @@ def change_dictionary_key_name(dict_object):
 
 
 if __name__ == '__main__':
-    with open(r"F:\Feri\egyetem\szakdoga\hgok-alt-keretrendszer\src\main\resources\static\working-dir\tool-names.json") as f:
+    dir = os.path.join(os.getcwd(), "src/main/resources/static/working-dir/tool-names.json")
+    with open(dir) as f:
         temp = json.loads(f.readlines()[0])
         dir_tool_map = change_dictionary_key_name(temp)
 

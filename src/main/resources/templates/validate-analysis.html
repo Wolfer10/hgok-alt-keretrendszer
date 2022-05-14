@@ -24,14 +24,18 @@
             <div class="grid-block" >
                 <div class="column-wrapper">
                     <h2 th:text="${currentLink.getSourceRelativeFileName() + ' sor:' + currentLink.getSourceStartLine()}" ></h2>
-                    <h3>Hívó kód</h3>
+                    <h3 th:text="${currentLink.getSourceFunctionName()}" ></h3>
+                    <h4>Hívó kód</h4>
                 </div>
-                <pre class="source" th:utext="${currentLink.getSourceSnippet()}"></pre>
+<!--                <pre class="source" th:utext="${currentLink.getSourceSnippet()}"></pre>-->
+                <pre class="source" id="s" th:utext="${currentLink.getSourceFunction()}"></pre>
                 <div class="column-wrapper">
                     <h2 th:text="${currentLink.getTargetRelativeFileName() + ' sor:' + currentLink.getTargetStartLine()}" ></h2>
-                    <h3>Hívott kód</h3>
+                    <h3 id="targetName" th:text="${currentLink.getTargetFunctionName()}" ></h3>
+                    <h4>Hívott kód</h4>
                 </div>
-                <pre class="target" th:utext="${currentLink.getTargetSnippet()}"></pre>
+<!--                <pre class="target" th:utext="${currentLink.getTargetSnippet()}"></pre>-->
+                <pre class="target" id="t" th:utext="${currentLink.getTargetFunction()}"></pre>
                 <div id="aside">
                     <div id="probs">
                         <div class="tool">
@@ -42,7 +46,7 @@
                         </div>
                         <p>Az eddigi elemzés alapján az él helyességének valószínűsége
                             <span> 70% </span>
-                            <span class="result"> -> Helyes</span>
+                            <span class="result" th:text="${currentLink.getMatched() ? 'Helyes' : 'Helytelen'}" > </span>
                         </p>
 
                     </div>
@@ -107,7 +111,6 @@
         function exucute_validation() {
             $.post(/*[[ @{/validateLink} ]]*/, {valid_link: $("input[name='valid-link']:checked").val()});
         }
-
         window.onload = () => {
             var form = document.getElementById("validation-form");
             form.addEventListener("submit", function (event) {
@@ -118,7 +121,18 @@
             document.querySelectorAll('pre').forEach((el) => {
                 hljs.highlightElement(el);
             });
+            highlight();
         };
+
+        function highlight(){
+            const regex = new RegExp(document.getElementById('targetName').innerHTML, 'gi');
+            const source = document.getElementById('s');
+            let text = source.innerHTML;
+            text = text.replace(/(<mark class="highlight">|<\/mark>)/gim, '');
+            source.innerHTML = text.replace(regex, '<mark class="highlight">$&</mark>');
+        }
+
+
     </script>
 </div>
 

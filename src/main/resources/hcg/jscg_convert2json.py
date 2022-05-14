@@ -76,8 +76,6 @@ def convert_acg_js(wd):
     global CNT
     CNT = 1
     for f in glob.glob(os.path.join(wd, "*" + ext)):
-        print(f)
-        print("+++++")
         j = create_schema()
         with open(f, "r") as fp:
             lines = fp.readlines()
@@ -239,7 +237,6 @@ def stats_for_json(wd):
 
 def main(wd):
     dir_name = os.path.basename(wd).lower()
-
     if "acg" in dir_name:
         convert_acg_js(wd)
         print("acg futott le")

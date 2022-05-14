@@ -15,6 +15,7 @@
 <table class="table">
     <tr>
         <th scope="col">#</th>
+        <th scope="col">id</th>
         <th scope="col">Elemzés indítási dátuma:</th>
         <th scope="col">Fájl vagy mappa neve:</th>
         <th scope="col">Az státusza:</th>
@@ -24,6 +25,7 @@
 
     <tr style="border: 2px solid black" th:each = "analysis, iter : ${analysisList}">
         <th scope="row" th:text="${iter.count}"> </th>
+        <td th:text="${analysis.getId()}"> </td>
         <td th:text="${analysis.getTimestamp()}"> </td>
         <td th:text="${analysis.getPathName() == null ? 'nem volt' : analysis.getPathName()}"> </td>
         <td th:text="${analysis.getStatus()}"> </td>

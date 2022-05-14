@@ -54,6 +54,7 @@ class ComparedAnalysisServiceTest {
         when(toolResultService.getToolResultByToolId(any(Long.class), any(Long.class))).thenReturn(toolResult);
         when(comparedAnalysis.getToolMetrics()).thenReturn(List.of(metricContainer));
         when(comparedAnalysis.getAnalysis()).thenReturn(new Analysis(1L));
+
         comparedAnalysisService.initToolResults();
 
         for (MetricContainer toolMetric : comparedAnalysis.getToolMetrics()) {

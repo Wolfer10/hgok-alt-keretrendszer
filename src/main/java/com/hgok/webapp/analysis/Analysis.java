@@ -2,10 +2,7 @@ package com.hgok.webapp.analysis;
 
 import com.hgok.webapp.compared.ComparedAnalysis;
 import com.hgok.webapp.tool.Tool;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -17,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@ToString
 public class Analysis {
 
     @Id
@@ -47,6 +45,13 @@ public class Analysis {
         this.status = status;
         this.timestamp = timestamp;
         this.pathName = pathName;
+    }
+    public Analysis(List<Tool> tools, String status, Timestamp timestamp, String pathName, ComparedAnalysis comparedAnalysis) {
+        this.tools = tools;
+        this.status = status;
+        this.timestamp = timestamp;
+        this.pathName = pathName;
+        this.comparedAnalysis = comparedAnalysis;
     }
 
     public Analysis(Long id) {

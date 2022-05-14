@@ -53,7 +53,10 @@ public class MetricContainer {
     }
 
     public void setRecall(int truePositive, int ourTruePositive){
-        if (ourTruePositive == 0) recall = 0.0;
+        if (ourTruePositive == 0){
+            recall = 0.0;
+            return;
+        }
         recall = (double) truePositive / (double) ourTruePositive;
     }
 

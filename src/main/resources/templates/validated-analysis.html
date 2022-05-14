@@ -53,8 +53,10 @@
     <tr th:each="metric :  ${compared.getMetricContainers()}">
         <td th:text="${metric.getTool().getName()}" > </td>
         <td th:text="${metric.getToolResult().getValidationLength()}"> </td>
-        <td th:text="${metric.getToolResult().getMemoryData().getMaxMemory()}"> </td>
-        <td th:text="${metric.getToolResult().getMemoryData().getAverageMemory()}"> </td>
+<!--        <td th:text="${metric.getToolResult().getMemoryData().getMaxMemory()}"> </td>-->
+<!--        <td th:text="${metric.getToolResult().getMemoryData().getAverageMemory()}"> </td>-->
+        <td>M1</td>
+        <td>M2</td>
         <td th:text="${metric.getTruePositive()}" > </td>
         <td th:text="${metric.getAll()}" > </td>
         <td th:text="${metric.getOurTruePositive()}" > </td>

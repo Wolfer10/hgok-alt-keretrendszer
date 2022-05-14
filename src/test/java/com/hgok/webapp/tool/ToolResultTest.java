@@ -27,12 +27,6 @@ class ToolResultTest {
     }
 
     @Test
-    void initResult() {
-    }
-
-
-
-    @Test
     void appendResultToFile() throws IOException {
         String expected = "alma";
         result.setResult((expected + "\n").getBytes());

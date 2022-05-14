@@ -12,7 +12,7 @@ public interface ToolRepository extends JpaRepository<Tool, Long> {
 
     @Query(value = "SELECT DISTINCT t.language  FROM tool t",
             nativeQuery=true)
-    List<String> GroupToolLanguages();
+    List<String> groupToolLanguages();
 
     @Query(value = "SELECT * FROM Tool t WHERE t.language = :ln",
             nativeQuery=true)

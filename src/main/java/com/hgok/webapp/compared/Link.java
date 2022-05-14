@@ -1,8 +1,6 @@
 package com.hgok.webapp.compared;
 
 import java.util.List;
-import javax.annotation.Generated;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 
 import com.google.gson.annotations.Expose;
@@ -50,9 +48,18 @@ public class Link {
 
     @Lob
     private String targetSnippet;
-
+    @Lob
+    private String targetFunction;
+    @Lob
+    private String sourceFunction;
     @Lob
     private String sourceSnippet;
+
+    private String sourceFunctionName;
+    private String targetFunctionName;
+
+    private Boolean matched;
+    private Double matchChance;
 
     private String targetRelativeFileName;
     private String sourceRelativeFileName;

@@ -37,14 +37,10 @@ class ComparedAnalysisTest {
 
     @Test
     public void updateMetrics(){
-
         ComparedAnalysis comparedAnalysis = new ComparedAnalysis();
-
         Analysis analysis = initAnalysis(comparedAnalysis);
         comparedAnalysis.setAnalysis(analysis);
-
         comparedAnalysis.updateMetricContainers(10);
-
         for (MetricContainer metricContainer : comparedAnalysis.getMetricContainers()) {
             assertThat(metricContainer.getOurTruePositive()).isEqualTo(10);
         }
@@ -78,5 +74,11 @@ class ComparedAnalysisTest {
         comparedAnalysis.setLinks(new ArrayList<>());
         analysis.setComparedAnalysis(comparedAnalysis);
         return analysis;
+    }
+
+    @Test
+    void getNpmNameTest() {
+        String name = "[TestFile3]main:0";
+        assertThat(ComparedAnalysis.getNpmName(name)).isEqualTo("main");
     }
 }
